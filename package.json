@@ -1,0 +1,13 @@
+{
+  "name": "fivem-app",
+  "version": "1.0.0",
+  "description": "Aplicativo entregador do five-m.store",
+  "main": "app.js",
+  "author": "JesterIruka",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "fs": "^0.0.1-security",
+    "mysql": "^2.18.1"
+  }
+}
