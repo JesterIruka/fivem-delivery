@@ -31,11 +31,8 @@ function runApp() {
   console.log("> TOKEN: "+config.data.token);
 
   const check = async () => {
-    let playerList;
-    if (config.data.checkForOnlinePlayers)
-      playerList = await axios.get('http://127.0.0.1:30120/players.json');
-    else 
-      playerList = [];
+    let playerList = config.data.checkForOnlinePlayers ?
+      await axios.get('http://127.0.0.1:30120/players.json') : [];
     search(players, api, link, ['/packages', '/delivery'], 'Aprovado');
     search(players, api, link, ['/refunds', '/punish'], 'Chargeback');
   };
@@ -77,7 +74,7 @@ function isOnline(playerList, id) {
   const hex = 'steam:'+id;
   for (let x = 0; x < playerList.length; x++) {
     const player = playerList[x];
-    if (player.id == id || player.identifiers.includes(hex)) {
+    if (player.id == id || player.identifiers.includes(hex) || player.identifiers.includes(id)) {
       return true;
     }
   }
