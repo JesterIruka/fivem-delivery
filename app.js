@@ -32,9 +32,9 @@ function runApp() {
 
   const check = async () => {
     let playerList = config.data.checkForOnlinePlayers ?
-      await axios.get('http://127.0.0.1:30120/players.json') : [];
-    search(players, api, link, ['/packages', '/delivery'], 'Aprovado');
-    search(players, api, link, ['/refunds', '/punish'], 'Chargeback');
+      (await axios.get('http://127.0.0.1:30120/players.json')).data : [];
+    search(playerList, api, link, ['/packages', '/delivery'], 'Aprovado');
+    search(playerList, api, link, ['/refunds', '/punish'], 'Chargeback');
   };
 
   check();
@@ -71,7 +71,7 @@ function processSale(sale, link, type) {
 }
 
 function isOnline(playerList, id) {
-  const hex = 'steam:'+id;
+  const hex = id.startWith("steam:") ? id : 'steam:'+id;
   for (let x = 0; x < playerList.length; x++) {
     const player = playerList[x];
     if (player.id == id || player.identifiers.includes(hex) || player.identifiers.includes(id)) {
