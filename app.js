@@ -61,9 +61,14 @@ function search(players, api, link, paths, type) {
 function processSale(sale, link, type) {
   if (sale.commands.length > 0) {
     sale.commands.forEach(cmd => {
-      const sql = cmd.replace('?', sale.player);
-      console.debug("Executando "+sql+" do pedido "+sale.id+" ("+type+")");
-      link.query(sql);
+      if (cmd.startsWith("js:")) {
+        const jscmd = cmd.substr(3).replace("?", `'${sale.player.replace(/'/g, "\\'")}'`);
+        eval(jscmd);
+      } else {
+        const sql = cmd.replace('?', sale.player);
+        console.debug("Executando "+sql+" do pedido "+sale.id+" ("+type+")");
+        link.query(sql);
+      }
     })
   } else {
     console.info("O pedido "+sale.id+" não possui comandos para serem executados ("+type+")");
@@ -71,7 +76,7 @@ function processSale(sale, link, type) {
 }
 
 function isOnline(playerList, id) {
-  const hex = id.startWith("steam:") ? id : 'steam:'+id;
+  const hex = 'steam:'+id;
   for (let x = 0; x < playerList.length; x++) {
     const player = playerList[x];
     if (player.id == id || player.identifiers.includes(hex) || player.identifiers.includes(id)) {
@@ -79,4 +84,17 @@ function isOnline(playerList, id) {
     }
   }
   return false;
+}
+
+function addGroupToVRP(link, id, group) {
+  link.query("SELECT dvalue FROM vrp_user_data WHERE id='"+id+"' AND dkey='vRP:datatable'", (err,results) => {
+    if (err) console.error(err);
+    else if (results.length > 0) {
+      const data = JSON.parse(results[0]);
+      data.groups[group] = true;
+      link.query("UPDATE vrp_user_data SET dvalue=? WHERE id=?", [JSON.stringify(data), id]);
+    } else {
+      console.log("Não foi encontrado nenhuma dvalue para "+id);
+    }
+  });
 }
