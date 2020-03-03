@@ -106,7 +106,7 @@ async function addGroupVRP(id, group) {
   if (isOnline(id)) return false;
   const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id='"+id+"' AND dkey='vRP:datatable'");
   if (res.length > 0) {
-    const data = JSON.parse(results[0]);
+    const data = JSON.parse(res[0].dvalue);
     data.groups[group] = true;
     sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=?", [JSON.stringify(data), id]);
     return true;
@@ -144,6 +144,16 @@ async function addHouseVRP(id, house) {
   let number = 1;
   if (highest.length > 0) number=highest[0].high+1;
   await sql('INSERT INTO vrp_user_homes (user_id,home,number) VALUES (?,?,?)', [id,house,number]);
+  return true;
+}
+
+async function addCarroVRP(id, car) {
+  return await addCarVRP(id, car);
+}
+
+async function addCarVRP(id, car) {
+  if (isOnline(id)) return false;
+  await sql('INSERT INTO vrp_user_vehicles (user_id,vehicle) VALUES (?,?)', [id,car]);
   return true;
 }
 
