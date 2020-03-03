@@ -141,7 +141,11 @@ async function sql(sql, values=[]) {
     console.log(`    > ${sql}`);
     console.log(`    > [${values.join(',')}]`);
     link.query(sql, values, (err,results) => {
-      if (err) reject(err);
+      if (err) {
+        console.error('Error in '+sql);
+        console.error(err);
+        reject(err);
+      }
       else resolve(results);
     });
   });
