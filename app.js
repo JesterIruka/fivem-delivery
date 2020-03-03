@@ -2,6 +2,8 @@ const fs = require('fs');
 const mysql = require('mysql');
 const axios = require('axios').default;
 const config = require('./src/config');
+let scheduled = JSON.parse(fs.readFileSync('./scheduled.json'));
+let playerList = [];
 
 let link;
 
@@ -31,21 +33,24 @@ function runApp() {
   console.log("> TOKEN: "+config.data.token);
 
   const check = async () => {
-    let playerList = config.data.checkForOnlinePlayers ?
-      (await axios.get('http://127.0.0.1:30120/players.json')).data : [];
-    search(playerList, api, link, ['/packages', '/delivery'], 'Aprovado');
-    search(playerList, api, link, ['/refunds', '/punish'], 'Chargeback');
+    if (config.data.checkForOnlinePlayers)
+      playerList = (await axios.get('http://127.0.0.1:30120/players.json')).data;
+    search(api, ['/packages', '/delivery'], 'Aprovado');
+    search(api, ['/refunds', '/punish'], 'Chargeback');
+
+    await readSchedules();
+    saveSchedules();
   };
 
   check();
   setInterval(check, 60000);
 }
 
-function search(players, api, link, paths, type) {
+function search(api, paths, type) {
   api.get(paths[0]).then(res => {
-    const sales = res.data.filter(sale => !isOnline(players, sale.player));
+    const sales = res.data.filter(sale => !isOnline(sale.player));
     if (sales.length > 0) {
-      sales.forEach(sale => processSale(sale, link, type));
+      sales.forEach(sale => processSale(sale, type));
       const ids = sales.map(s => s.id).join(',');
       api.get(paths[1]+'?ids='+ids).then(res => {
         if (res.data.error) {
@@ -55,19 +60,17 @@ function search(players, api, link, paths, type) {
         }
       });
     }
-  }).catch(err => console.error("Falha ao consultar API: "+err.errno));
+  }).catch(err => console.error("Falha ao consultar API: "+err));
 }
 
-function processSale(sale, link, type) {
+function processSale(sale, type) {
   if (sale.commands.length > 0) {
     sale.commands.forEach(cmd => {
-      if (cmd.startsWith("js:")) {
-        const jscmd = cmd.substr(3).replace("?", `'${sale.player.replace(/'/g, "\\'")}'`);
-        eval(jscmd);
-      } else {
-        const sql = cmd.replace('?', sale.player);
-        console.debug("Executando "+sql+" do pedido "+sale.id+" ("+type+")");
-        link.query(sql);
+      const runner = cmd.replace('?', sale.player);
+      try {
+        eval(runner);
+      } catch (ex) {
+        console.error(ex, sale.id);
       }
     })
   } else {
@@ -75,7 +78,7 @@ function processSale(sale, link, type) {
   }
 }
 
-function isOnline(playerList, id) {
+function isOnline(id) {
   const hex = 'steam:'+id;
   for (let x = 0; x < playerList.length; x++) {
     const player = playerList[x];
@@ -86,15 +89,76 @@ function isOnline(playerList, id) {
   return false;
 }
 
-function addGroupToVRP(link, id, group) {
-  link.query("SELECT dvalue FROM vrp_user_data WHERE id='"+id+"' AND dkey='vRP:datatable'", (err,results) => {
-    if (err) console.error(err);
-    else if (results.length > 0) {
-      const data = JSON.parse(results[0]);
-      data.groups[group] = true;
-      link.query("UPDATE vrp_user_data SET dvalue=? WHERE id=?", [JSON.stringify(data), id]);
-    } else {
-      console.log("Não foi encontrado nenhuma dvalue para "+id);
+function after(days, eval) {
+  const date = new Date().getTime() + (86400000 * days);
+  const uid = uuidv4();
+  scheduled.push({uid,date,eval});
+  saveSchedules();
+}
+
+async function addGroupVRP(id, group) {
+  if (isOnline(id)) return false;
+  const res = await sql("SELECT dvalue FROM vrp_user_data WHERE id='"+id+"' AND dkey='vRP:datatable'");
+  if (res.length > 0) {
+    const data = JSON.parse(results[0]);
+    data.groups[group] = true;
+    sql("UPDATE vrp_user_data SET dvalue=? WHERE id=?", [JSON.stringify(data), id]);
+    return true;
+  } else {
+    console.log('Não foi encontrado nenhum dvalue para '+id);
+    return false;
+  }
+}
+
+async function removeGroupVRP(id, group) {
+  if (isOnline(id)) return false;
+  const res = await sql("SELECT dvalue FROM vrp_user_data WHERE id='"+id+"' AND dkey='vRP:datatable'");
+  if (res.length > 0) {
+    const data = JSON.parse(results[0]);
+    delete data.groups[group];
+    sql("UPDATE vrp_user_data SET dvalue=? WHERE id=?", [JSON.stringify(data), id]);
+    return true;
+  } else {
+    console.log('Não foi encontrado nenhum dvalue para '+id);
+    return false;
+  }
+}
+
+async function addHouseVRP(id, house) {
+  if (isOnline(id)) return false;
+  const highest = await sql('SELECT MAX(number) AS `high` FROM vrp_user_homes WHERE home=?', [house]);
+  let number = 1;
+  if (highest.length > 0) number=highest[0].high+1;
+  await sql('INSERT INTO vrp_user_homes (user_id,home,number) VALUES (?,?,?)', [id,house,number]);
+  return true;
+}
+
+async function sql(sql, values=[]) {
+  return await new Promise((resolve,reject) => {
+    link.query(sql, values, (err,results) => {
+      if (err) reject(err);
+      else resolve(results);
+    });
+  });
+}
+
+async function readSchedules() {
+  const now = new Date().getTime();
+  scheduled.forEach(s => {
+    if (s.date <= now) {
+      eval(s.eval);
+      scheduled = scheduled.filter(o=>o.uid!=s.uid);
     }
+  });
+}
+
+function saveSchedules() {
+  fs.writeFileSync('./scheduled.json', JSON.stringify(scheduled, null, 4));
+}
+
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
   });
 }
