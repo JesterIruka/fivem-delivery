@@ -100,11 +100,11 @@ function after(days, eval) {
 
 async function addGroupVRP(id, group) {
   if (isOnline(id)) return false;
-  const res = await sql("SELECT dvalue FROM vrp_user_data WHERE id='"+id+"' AND dkey='vRP:datatable'");
+  const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id='"+id+"' AND dkey='vRP:datatable'");
   if (res.length > 0) {
     const data = JSON.parse(results[0]);
     data.groups[group] = true;
-    sql("UPDATE vrp_user_data SET dvalue=? WHERE id=?", [JSON.stringify(data), id]);
+    sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=?", [JSON.stringify(data), id]);
     return true;
   } else {
     console.log('Não foi encontrado nenhum dvalue para '+id);
@@ -114,11 +114,11 @@ async function addGroupVRP(id, group) {
 
 async function removeGroupVRP(id, group) {
   if (isOnline(id)) return false;
-  const res = await sql("SELECT dvalue FROM vrp_user_data WHERE id='"+id+"' AND dkey='vRP:datatable'");
+  const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id='"+id+"' AND dkey='vRP:datatable'");
   if (res.length > 0) {
     const data = JSON.parse(results[0]);
     delete data.groups[group];
-    sql("UPDATE vrp_user_data SET dvalue=? WHERE id=?", [JSON.stringify(data), id]);
+    sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=?", [JSON.stringify(data), id]);
     return true;
   } else {
     console.log('Não foi encontrado nenhum dvalue para '+id);
