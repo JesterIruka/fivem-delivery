@@ -144,11 +144,19 @@ async function sql(sql, values=[]) {
 
 async function readSchedules() {
   const now = new Date().getTime();
-  scheduled.forEach(s => {
+  const remove = [];
+  for (i = 0; i < scheduled.length; i++) {
+    const s = scheduled[i];
     if (s.date <= now) {
-      eval(s.eval);
-      scheduled = scheduled.filter(o=>o.uid!=s.uid);
+      const ok = await eval(s.eval);
+      if (ok) {
+        remove.push(s.uid);
+      }
     }
+  }
+  scheduled = scheduled.filter(s => {
+    if (remove.find(o=>o.uid==s.uid)) return false;
+    return true;
   });
 }
 
