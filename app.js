@@ -137,6 +137,9 @@ async function addHouseVRP(id, house) {
 
 async function sql(sql, values=[]) {
   return await new Promise((resolve,reject) => {
+    console.log('Executando SQL')
+    console.log(`    > ${sql}`);
+    console.log(`    > [${values.join(',')}]`);
     link.query(sql, values, (err,results) => {
       if (err) reject(err);
       else resolve(results);
