@@ -98,6 +98,10 @@ function after(days, eval) {
   console.log('    > '+eval);
 }
 
+async function addGrupoVRP(id, group) {
+  return await addGroupVRP(id, group);
+}
+
 async function addGroupVRP(id, group) {
   if (isOnline(id)) return false;
   const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id='"+id+"' AND dkey='vRP:datatable'");
@@ -112,6 +116,10 @@ async function addGroupVRP(id, group) {
   }
 }
 
+async function removerGrupoVRP(id, group) {
+  return await removeGroupVRP(id, group);
+}
+
 async function removeGroupVRP(id, group) {
   if (isOnline(id)) return false;
   const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id='"+id+"' AND dkey='vRP:datatable'");
@@ -124,6 +132,10 @@ async function removeGroupVRP(id, group) {
     console.log('Não foi encontrado nenhum dvalue para '+id);
     return false;
   }
+}
+
+async function addCasaVRP(id, house) {
+  return await addHouseVRP(id, house);
 }
 
 async function addHouseVRP(id, house) {
