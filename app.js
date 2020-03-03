@@ -94,6 +94,8 @@ function after(days, eval) {
   const uid = uuidv4();
   scheduled.push({uid,date,eval});
   saveSchedules();
+  console.log('Foi agendado um comando para '+days+' dia'+(days>1?'s':''));
+  console.log('    > '+eval);
 }
 
 async function addGroupVRP(id, group) {
