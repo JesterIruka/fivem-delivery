@@ -5,6 +5,11 @@ const config = require('./src/config');
 let scheduled = JSON.parse(fs.readFileSync('./scheduled.json'));
 let playerList = [];
 
+const vrp = require('./src/vrp')(this);
+const esx = require('./src/esx')(this);
+
+vrp.addHouse()
+
 let link;
 
 if (config.exists()) {
