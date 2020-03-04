@@ -12,6 +12,7 @@ function create() {
   fs.writeFileSync(__dirname+'/../config.json', JSON.stringify({
     token:'seu-token-da-loja',
     checkForOnlinePlayers:true,
+    debug:false,
     host:'localhost',
     port:3306,
     database:'fivem',

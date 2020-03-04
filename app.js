@@ -8,6 +8,8 @@ let playerList = [];
 const vrp = require('./src/vrp')(this);
 const esx = require('./src/esx')(this);
 
+const DEBUG = config.data.debug || false;
+
 vrp.addHouse()
 
 let link;
@@ -73,6 +75,7 @@ function processSale(sale, type) {
     sale.commands.forEach(cmd => {
       const runner = cmd.replace('?', sale.player);
       try {
+        if (DEBUG) console.debug('EVAL > '+runner);
         eval(runner);
       } catch (ex) {
         console.error(ex, sale.id);
@@ -99,8 +102,10 @@ function after(days, eval) {
   const uid = uuidv4();
   scheduled.push({uid,date,eval});
   saveSchedules();
-  console.log('Foi agendado um comando para '+days+' dia'+(days>1?'s':''));
-  console.log('    > '+eval);
+  if (DEBUG) {
+    console.log('Foi agendado um comando para '+days+' dia'+(days>1?'s':''));
+    console.log('    > '+eval);
+  }
 }
 
 async function addGrupoVRP(id, group) {
@@ -167,16 +172,17 @@ async function addCarVRP(id, car) {
 
 async function sql(sql, values=[]) {
   return await new Promise((resolve,reject) => {
-    console.log('Executando SQL')
-    console.log(`    > ${sql}`);
-    console.log(`    > [${values.join(',')}]`);
+    if (DEBUG) {
+      console.log('Executando SQL')
+      console.log(`    > ${sql}`);
+      console.log(`    > [${values.join(',')}]`);
+    }
     link.query(sql, values, (err,results) => {
       if (err) {
-        console.error('Error in '+sql);
+        console.error('Erro em'+sql);
         console.error(err);
         reject(err);
-      }
-      else resolve(results);
+      } else resolve(results);
     });
   });
 }
