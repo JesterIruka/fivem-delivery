@@ -10,8 +10,6 @@ const esx = require('./src/esx')(this);
 
 const DEBUG = config.data.debug || false;
 
-vrp.addHouse()
-
 let link;
 
 if (config.exists()) {
@@ -106,68 +104,6 @@ function after(days, eval) {
     console.log('Foi agendado um comando para '+days+' dia'+(days>1?'s':''));
     console.log('    > '+eval);
   }
-}
-
-async function addGrupoVRP(id, group) {
-  return await addGroupVRP(id, group);
-}
-
-async function addGroupVRP(id, group) {
-  if (isOnline(id)) return false;
-  const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id='"+id+"' AND dkey='vRP:datatable'");
-  if (res.length > 0) {
-    const data = JSON.parse(res[0].dvalue);
-    if (data.groups.isArray()) {
-      data.groups = {};
-    }
-    data.groups[group] = true;
-    sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=?", [JSON.stringify(data), id]);
-    return true;
-  } else {
-    console.log('Não foi encontrado nenhum dvalue para '+id);
-    return false;
-  }
-}
-
-async function removerGrupoVRP(id, group) {
-  return await removeGroupVRP(id, group);
-}
-
-async function removeGroupVRP(id, group) {
-  if (isOnline(id)) return false;
-  const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id=? AND dkey='vRP:datatable'", [id]);
-  if (res.length > 0) {
-    const data = JSON.parse(results[0]);
-    if (!data.groups.isArray()) delete data.groups[group];
-    sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=?", [JSON.stringify(data), id]);
-    return true;
-  } else {
-    console.log('Não foi encontrado nenhum dvalue para '+id);
-    return false;
-  }
-}
-
-async function addCasaVRP(id, house) {
-  return await addHouseVRP(id, house);
-}
-
-async function addHouseVRP(id, house) {
-  if (isOnline(id)) return false;
-  const highest = await sql('SELECT MAX(number) AS `high` FROM vrp_user_homes WHERE home=?', [house]);
-  let number = 1;
-  if (highest.length > 0) number=highest[0].high+1;
-  await sql('INSERT INTO vrp_user_homes (user_id,home,number) VALUES (?,?,?)', [id,house,number]);
-  return true;
-}
-
-async function addCarroVRP(id, car) {
-  return await addCarVRP(id, car);
-}
-
-async function addCarVRP(id, car) {
-  if (isOnline(id)) return false;
-  await sql('INSERT INTO vrp_user_vehicles (user_id,vehicle) VALUES (?,?)', [id,car]);
-  return true;
 }
 
 async function sql(sql, values=[]) {

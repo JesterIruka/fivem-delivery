@@ -1,5 +1,6 @@
 module.exports = function (app) {
 
+  const sql = app.sql;
   const adicionarGrupo = addGroup;
   const adicionarCasa = addHouse;
   const adicionarCarro = addCar;
