@@ -5,15 +5,16 @@ const config = require('./src/config');
 let scheduled = JSON.parse(fs.readFileSync('./scheduled.json'));
 let playerList = [];
 
-const vrp = require('./src/vrp')(this);
-const esx = require('./src/esx')(this);
+const vrp = require('./src/vrp')({sql,isOnline});
+const esx = require('./src/esx')({sql,isOnline});
 
-const DEBUG = config.data.debug || false;
+let DEBUG = false;
 
 let link;
 
 if (config.exists()) {
   config.data = config.read();
+  DEBUG = config.data.debug || false;
   const { host,port,database,user,password } = config.data;
   link = mysql.createConnection({host, port, database, user, password});
   link.connect(err => {
@@ -96,12 +97,16 @@ function isOnline(id) {
 }
 
 function after(days, eval) {
+  const now = new Date().getTime();
+  const expires = (86400000*days);
   if (task = scheduled.find(task=>task.eval==eval)) {
-    task.date = new Date().getTime() + (86400000 * days);
+    if (task.date > now) { //acumular tempo de vip e outras coisas
+      task.date = task.date + expires;
+    } else {
+      task.date = now + expires;
+    }
   } else {
-    const date = new Date().getTime() + (86400000 * days);
-    const uid = uuidv4();
-    scheduled.push({uid,date,eval});
+    scheduled.push({uid:uuidv4(),date:(now+expires),eval});
   }
   saveSchedules();
   if (DEBUG) {
@@ -110,6 +115,7 @@ function after(days, eval) {
   }
 }
 
+this.sql = sql;
 async function sql(sql, values=[]) {
   return await new Promise((resolve,reject) => {
     if (DEBUG) {
@@ -140,7 +146,7 @@ async function readSchedules() {
     }
   }
   scheduled = scheduled.filter(s => {
-    if (remove.find(o=>o.uid==s.uid)) return false;
+    if (remove.includes(s.uid)) return false;
     return true;
   });
 }

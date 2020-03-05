@@ -11,7 +11,8 @@ module.exports = function (app) {
     const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id='"+id+"' AND dkey='vRP:datatable'");
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
-      if (data.groups.isArray()) {
+      console.log(data);
+      if (Array.isArray(data.groups)) {
         data.groups = {};
       }
       data.groups[group] = true;
@@ -28,7 +29,7 @@ module.exports = function (app) {
     const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id=? AND dkey='vRP:datatable'", [id]);
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
-      if (!data.groups.isArray()) delete data.groups[group];
+      if (!Array.isArray(data.groups)) delete data.groups[group];
       sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=?", [JSON.stringify(data), id]);
       return true;
     } else {
@@ -37,7 +38,7 @@ module.exports = function (app) {
     }
   }
 
-  async function addHouse(id, group) {
+  async function addHouse(id, house) {
     if (app.isOnline(id)) return false;
     const highest = await sql('SELECT MAX(number) AS `high` FROM vrp_user_homes WHERE home=?', [house]);
     let number = 1;
@@ -51,4 +52,11 @@ module.exports = function (app) {
     await sql('INSERT INTO vrp_user_vehicles (user_id,vehicle) VALUES (?,?)', [id,car]);
     return true;
   }
+  
+  return {
+    adicionarGrupo, addGroup,
+    removerGrupo, removeGroup,
+    adicionarCasa, addHouse,
+    adicionarCarro, addCar
+  };
 }

@@ -16,4 +16,10 @@ module.exports = function (app) {
   function addCar(id, group) {
 
   }
+  
+  return {
+    adicionarGrupo, addGroup,
+    adicionarCasa, addHouse,
+    adicionarCarro, addCar
+  };
 }
