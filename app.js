@@ -96,9 +96,13 @@ function isOnline(id) {
 }
 
 function after(days, eval) {
-  const date = new Date().getTime() + (86400000 * days);
-  const uid = uuidv4();
-  scheduled.push({uid,date,eval});
+  if (task = scheduled.find(task=>task.eval==eval)) {
+    task.date = new Date().getTime() + (86400000 * days);
+  } else {
+    const date = new Date().getTime() + (86400000 * days);
+    const uid = uuidv4();
+    scheduled.push({uid,date,eval});
+  }
   saveSchedules();
   if (DEBUG) {
     console.log('Foi agendado um comando para '+days+' dia'+(days>1?'s':''));
