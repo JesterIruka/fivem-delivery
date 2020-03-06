@@ -101,7 +101,7 @@ async function isOnline(id) {
       return true;
     }
   }
-  if (DEBUG) console.log(player.id+' is offline!');
+  console.log(id+' is offline');
   return false;
 }
 
