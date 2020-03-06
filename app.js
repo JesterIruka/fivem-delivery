@@ -96,7 +96,7 @@ async function isOnline(id) {
   }
   for (let x = 0; x < playerList.length; x++) {
     const player = playerList[x];
-    if (player.identifiers.includes(hex) || player.identifiers.includes(id)) {
+    if (player.identifiers.includes(identifier) || player.identifiers.includes(id)) {
       if (DEBUG) console.log(player.id+' is online!');
       return true;
     }
