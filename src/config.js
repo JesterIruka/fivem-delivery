@@ -12,6 +12,7 @@ function create() {
   fs.writeFileSync(__dirname+'/../config.json', JSON.stringify({
     token:'seu-token-da-loja',
     checkForOnlinePlayers:true,
+    playersJsonUrl:'http://127.0.0.1:30120/players.json',
     debug:false,
     host:'localhost',
     port:3306,

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const axios = require('axios').default;
 
-const find = ['app.js', 'src/vrp.js', 'src/esx.js'];
+const find = ['app.js', 'src/vrp.js', 'src/esx.js', 'src/config.js'];
 
 const api = axios.create({
   baseURL: 'https://raw.githubusercontent.com/JesterIruka/fivem-delivery/master/'

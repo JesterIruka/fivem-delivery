@@ -40,7 +40,7 @@ function runApp() {
 
   const check = async () => {
     if (config.data.checkForOnlinePlayers)
-      playerList = (await axios.get('http://127.0.0.1:30120/players.json')).data;
+      playerList = (await axios.get(config.data.playersJsonUrl)).data;
     search(api, ['/packages', '/delivery'], 'Aprovado');
     search(api, ['/refunds', '/punish'], 'Chargeback');
 
