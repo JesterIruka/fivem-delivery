@@ -5,6 +5,8 @@ module.exports = function (app) {
   const removerGrupo = removeGroup;
   const adicionarCasa = addHouse;
   const adicionarCarro = addCar;
+  const adicionarCarteira = addWallet;
+  const adicionarBanco = addBank;
 
   async function addGroup(id, group) {
     if (app.isOnline(id)) return false;
@@ -52,11 +54,25 @@ module.exports = function (app) {
     await sql('INSERT INTO vrp_user_vehicles (user_id,vehicle) VALUES (?,?)', [id,car]);
     return true;
   }
+
+  async function addWallet(id, value) {
+    if (app.isOnline(id)) return false;
+    await sql('UPDATE vrp_user_moneys SET wallet=wallet+? WHERE id=?', [value,id]);
+    return true;
+  }
+
+  async function addBank(id, value) {
+    if (app.isOnline(id)) return false;
+    await sql('UPDATE vrp_user_moneys SET bank=bank+? WHERE id=?', [value,id]);
+    return true;
+  }
   
   return {
     adicionarGrupo, addGroup,
     removerGrupo, removeGroup,
     adicionarCasa, addHouse,
-    adicionarCarro, addCar
+    adicionarCarro, addCar,
+    addWallet, adicionarCarteira,
+    addBank, adicionarBanco
   };
 }
