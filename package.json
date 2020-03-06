@@ -6,8 +6,8 @@
   "author": "JesterIruka",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.19.2",
     "fs": "^0.0.1-security",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "node-fetch": "^2.6.0"
   }
 }

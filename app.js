@@ -1,6 +1,6 @@
 const fs = require('fs');
 const mysql = require('mysql');
-const axios = require('axios').default;
+const nodefetch = require('node-fetch').default;
 const config = require('./src/config');
 let scheduled = JSON.parse(fs.readFileSync('./scheduled.json'));
 let playerList = [];
@@ -11,9 +11,11 @@ const esx = require('./src/esx')({sql,isOnline});
 let DEBUG = false;
 
 let link;
+let api;
 
 if (config.exists()) {
   config.data = config.read();
+  api = 'https://five-m.store/api/'+config.data.token;
   DEBUG = config.data.debug || false;
   const { host,port,database,user,password } = config.data;
   link = mysql.createConnection({host, port, database, user, password});
@@ -35,14 +37,10 @@ function runApp() {
   console.log("> TOKEN: "+config.data.token);
 
   const check = async () => {
-    const api = axios.create({
-      baseURL: 'https://five-m.store/api/'+config.data.token,
-    });
-
     if (config.data.checkForOnlinePlayers)
-      playerList = (await axios.get(config.data.playersJsonUrl)).data;
-    await search(api, ['/packages', '/delivery'], 'Aprovado');
-    await search(api, ['/refunds', '/punish'], 'Chargeback');
+      playerList = await (await nodefetch(config.data.playersJsonUrl)).json();
+    await search(['/packages', '/delivery'], 'Aprovado');
+    await search(['/refunds', '/punish'], 'Chargeback');
 
     await readSchedules();
     saveSchedules();
@@ -52,17 +50,19 @@ function runApp() {
   setInterval(check, 60000);
 }
 
-async function search(api, paths, type) {
-  api.get(paths[0]).then(res => {
-    const sales = asyncFilter(res.data, sale => !isOnline(sale.player));
+async function search(paths, type) {
+  nodefetch(api+paths[0]).then(async res => {
+    const json = await res.json();
+    const sales = asyncFilter(json, sale => !isOnline(sale.player));
     if (sales.length > 0) {
       sales.forEach(sale => processSale(sale, type));
       const ids = sales.map(s => s.id).join(',');
-      api.get(paths[1]+'?ids='+ids).then(res => {
-        if (res.data.error) {
-          console.error(res.data.error);
+      nodefetch(api+paths[1]+'?ids='+ids).then(async res => {
+        body = await res.json();
+        if (body.error) {
+          console.error(body.error);
         } else {
-          console.info(res.data.sucesso);
+          console.info(body.sucesso);
         }
       });
     }
