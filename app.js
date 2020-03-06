@@ -31,18 +31,18 @@ if (config.exists()) {
 }
 
 function runApp() {
-  const api = axios.create({
-    baseURL: 'https://five-m.store/api/'+config.data.token
-  });
-
   console.log("> FIVE-M.STORE");
   console.log("> TOKEN: "+config.data.token);
 
   const check = async () => {
+    const api = axios.create({
+      baseURL: 'https://five-m.store/api/'+config.data.token,
+    });
+
     if (config.data.checkForOnlinePlayers)
       playerList = (await axios.get(config.data.playersJsonUrl)).data;
-    search(api, ['/packages', '/delivery'], 'Aprovado');
-    search(api, ['/refunds', '/punish'], 'Chargeback');
+    await search(api, ['/packages', '/delivery'], 'Aprovado');
+    await search(api, ['/refunds', '/punish'], 'Chargeback');
 
     await readSchedules();
     saveSchedules();
@@ -52,9 +52,9 @@ function runApp() {
   setInterval(check, 60000);
 }
 
-function search(api, paths, type) {
+async function search(api, paths, type) {
   api.get(paths[0]).then(res => {
-    const sales = res.data.filter(sale => !isOnline(sale.player));
+    const sales = asyncFilter(res.data, sale => !isOnline(sale.player));
     if (sales.length > 0) {
       sales.forEach(sale => processSale(sale, type));
       const ids = sales.map(s => s.id).join(',');
@@ -85,14 +85,23 @@ function processSale(sale, type) {
   }
 }
 
-function isOnline(id) {
-  const hex = 'steam:'+id;
+async function isOnline(id) {
+  let identifier = 'steam:'+id;
+  if (parseInt(id) > 0) {
+    res = await sql("SELECT `identifier` FROM vrp_user_ids WHERE id=? AND identifier LIKE 'license:%'", [id])
+    if (res.length == 0) {
+      if (DEBUG) console.log('Não foi possível encontrar o identifier de '+id);
+      return true;
+    } else identifier = res[0].identifier;
+  }
   for (let x = 0; x < playerList.length; x++) {
     const player = playerList[x];
-    if (player.id == id || player.identifiers.includes(hex) || player.identifiers.includes(id)) {
+    if (player.identifiers.includes(hex) || player.identifiers.includes(id)) {
+      if (DEBUG) console.log(player.id+' is online!');
       return true;
     }
   }
+  if (DEBUG) console.log(player.id+' is offline!');
   return false;
 }
 
@@ -131,6 +140,16 @@ async function sql(sql, values=[]) {
       } else resolve(results);
     });
   });
+}
+
+async function asyncFilter(array, callback) {
+  for (let x = 0; x < array.length; x++) {
+    const filtered = await callback(array[x]);
+    if (!filtered) {
+      array[x] = null;
+    }
+  }
+  return array.filter(e => e != null);
 }
 
 async function readSchedules() {

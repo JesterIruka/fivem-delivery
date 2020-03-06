@@ -11,7 +11,7 @@ module.exports = function (app) {
   const adicionarBanco = addBank;
 
   async function addGroup(id, group) {
-    if (app.isOnline(id)) return false;
+    if (await app.isOnline(id)) return false;
     const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id='"+id+"' AND dkey='vRP:datatable'");
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
@@ -29,7 +29,7 @@ module.exports = function (app) {
   }
 
   async function removeGroup(id, group) {
-    if (app.isOnline(id)) return false;
+    if (await app.isOnline(id)) return false;
     const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id=? AND dkey='vRP:datatable'", [id]);
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
@@ -43,7 +43,7 @@ module.exports = function (app) {
   }
 
   async function addHouse(id, house) {
-    if (app.isOnline(id)) return false;
+    if (await app.isOnline(id)) return false;
     const highest = await sql('SELECT MAX(number) AS `high` FROM vrp_user_homes WHERE home=?', [house]);
     let number = 1;
     if (highest.length > 0) number=highest[0].high+1;
@@ -52,31 +52,31 @@ module.exports = function (app) {
   }
 
   async function removeHouse(id, house) {
-    if (app.isOnline(id)) return false;
+    if (await app.isOnline(id)) return false;
     await sql('DELETE FROM vrp_user_homes WHERE user_id=? AND home=?', [id,house]);
     return true;
   }
 
   async function addCar(id, car) {
-    if (app.isOnline(id)) return false;
+    if (await app.isOnline(id)) return false;
     await sql('INSERT INTO vrp_user_vehicles (user_id,vehicle) VALUES (?,?)', [id,car]);
     return true;
   }
 
   async function removeCar(id, car) {
-    if (app.isOnline(id)) return false;
+    if (await app.isOnline(id)) return false;
     await sql('DELETE FROM vrp_user_vehicles WHERE user_id=? AND vehicle=?', [id,car]);
     return true;
   }
 
   async function addWallet(id, value) {
-    if (app.isOnline(id)) return false;
+    if (await app.isOnline(id)) return false;
     await sql('UPDATE vrp_user_moneys SET wallet=wallet+? WHERE id=?', [value,id]);
     return true;
   }
 
   async function addBank(id, value) {
-    if (app.isOnline(id)) return false;
+    if (await app.isOnline(id)) return false;
     await sql('UPDATE vrp_user_moneys SET bank=bank+? WHERE id=?', [value,id]);
     return true;
   }
