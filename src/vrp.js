@@ -6,6 +6,7 @@ module.exports = function (app) {
   const adicionarCasa = addHouse;
   const removerCasa = removeHouse;
   const adicionarCarro = addCar;
+  const removerCarro = removeCar;
   const adicionarCarteira = addWallet;
   const adicionarBanco = addBank;
 
@@ -59,6 +60,12 @@ module.exports = function (app) {
   async function addCar(id, car) {
     if (app.isOnline(id)) return false;
     await sql('INSERT INTO vrp_user_vehicles (user_id,vehicle) VALUES (?,?)', [id,car]);
+    return true;
+  }
+
+  async function removeCar(id, car) {
+    if (app.isOnline(id)) return false;
+    await sql('DELETE FROM vrp_user_vehicles WHERE user_id=? AND vehicle=?', [id,car]);
     return true;
   }
 
