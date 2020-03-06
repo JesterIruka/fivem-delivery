@@ -20,7 +20,7 @@ module.exports = function (app) {
         data.groups = {};
       }
       data.groups[group] = true;
-      sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=?", [JSON.stringify(data), id]);
+      sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'", [JSON.stringify(data), id]);
       return true;
     } else {
       console.log('Não foi encontrado nenhum dvalue para '+id);
@@ -34,7 +34,7 @@ module.exports = function (app) {
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
       if (!Array.isArray(data.groups)) delete data.groups[group];
-      sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=?", [JSON.stringify(data), id]);
+      sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'", [JSON.stringify(data), id]);
       return true;
     } else {
       console.log('Não foi encontrado nenhum dvalue para '+id);
