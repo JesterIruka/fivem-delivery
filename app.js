@@ -53,7 +53,8 @@ function runApp() {
 async function search(paths, type) {
   nodefetch(api+paths[0]).then(async res => {
     const json = await res.json();
-    const sales = asyncFilter(json, sale => !isOnline(sale.player));
+    console.log(json);
+    const sales = await asyncOnlineFilter(json);
     if (sales.length > 0) {
       sales.forEach(sale => processSale(sale, type));
       const ids = sales.map(s => s.id).join(',');
@@ -65,7 +66,7 @@ async function search(paths, type) {
           console.info(body.sucesso);
         }
       });
-    }
+    } else if (DEBUG) console.log('Sem vendas para processar ('+type+')');
   }).catch(err => console.error("Falha ao consultar API: "+err));
 }
 
@@ -142,14 +143,12 @@ async function sql(sql, values=[]) {
   });
 }
 
-async function asyncFilter(array, callback) {
-  for (let x = 0; x < array.length; x++) {
-    const filtered = await callback(array[x]);
-    if (!filtered) {
-      array[x] = null;
-    }
+async function asyncOnlineFilter(sales) {
+  for (let x = 0; x < sales.length; x++) {
+    const online = (await isOnline(sales[x].player));
+    if (online) sales[x] = null;
   }
-  return array.filter(e => e != null);
+  return sales.filter(e => e != null);
 }
 
 async function readSchedules() {
