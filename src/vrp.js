@@ -71,13 +71,13 @@ module.exports = function (app) {
 
   async function addWallet(id, value) {
     if (await app.isOnline(id)) return false;
-    await sql('UPDATE vrp_user_moneys SET wallet=wallet+? WHERE id=?', [value,id]);
+    await sql('UPDATE vrp_user_moneys SET wallet=wallet+? WHERE user_id=?', [value,id]);
     return true;
   }
 
   async function addBank(id, value) {
     if (await app.isOnline(id)) return false;
-    await sql('UPDATE vrp_user_moneys SET bank=bank+? WHERE id=?', [value,id]);
+    await sql('UPDATE vrp_user_moneys SET bank=bank+? WHERE user_id=?', [value,id]);
     return true;
   }
   
