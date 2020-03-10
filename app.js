@@ -107,6 +107,7 @@ async function isOnline(id) {
 }
 
 function after(days, eval) {
+  if (eval instanceof Function) eval = eatArrow(eval.toString());
   const now = new Date().getTime();
   const expires = (86400000*days);
   if (task = scheduled.find(task=>task.eval==eval)) {
@@ -178,4 +179,9 @@ function uuidv4() {
     var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
+}
+
+function eatArrow(obj) {
+  if (obj instanceof Function) obj = obj.toString();
+  return obj.replace('(','').replace(')', '').replace('=>', '').trimStart();
 }
