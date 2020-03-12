@@ -57,10 +57,10 @@ module.exports = function (app) {
     let higher = 1;
     for (let row of rows) {
       const number = parseInt(row.home.substr(housePrefix.length));
-      if (number > higher) higher = number+1;
+      if (number >= higher) higher = number+1;
     }
     higher = (higher>9)?higher:"0"+higher;
-    await sql("INSERT INTO vrp_homes_permissions (user_id,home,owner) VALUES (?,?,1)", [id, housePrefix+higher])
+    await sql("INSERT INTO vrp_homes_permissions (user_id,home,owner,garage) VALUES (?,?,1,1)", [id, housePrefix+higher])
     return true;
   }
 
