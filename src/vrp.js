@@ -56,7 +56,7 @@ module.exports = function (app) {
     const rows = await sql(`SELECT home FROM vrp_homes_permissions WHERE home LIKE '${housePrefix}%'`);
     let higher = 1;
     for (let row of rows) {
-      const number = parseInt(row.substr(housePrefix.length));
+      const number = parseInt(row.home.substr(housePrefix.length));
       if (number > higher) higher = number+1;
     }
     higher = (higher>9)?higher:"0"+higher;
