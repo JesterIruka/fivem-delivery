@@ -51,6 +51,25 @@ module.exports = function (app) {
     return true;
   }
 
+  async function addHousePermission(id, housePrefix) {
+    if (await app.isOnline(id)) return false;
+    const rows = await sql(`SELECT home FROM vrp_homes_permissions WHERE home LIKE '${housePrefix}%'`);
+    let higher = 1;
+    for (let row of rows) {
+      const number = parseInt(row.substr(housePrefix.length));
+      if (number > higher) higher = number+1;
+    }
+    higher = (higher>9)?higher:"0"+higher;
+    await sql("INSERT INTO vrp_homes_permissions (user_id,home,owner) VALUES (?,?,1)", [id, housePrefix+higher])
+    return true;
+  }
+
+  async function removeHousePermission(id, housePrefix) {
+    if (await app.isOnline(id)) return false;
+    await sql(`DELETE FROM vrp_homes_permissions WHERE user_id=? AND home LIKE '${housePrefix}%' AND owner>0`);
+    return true;
+  }
+
   async function removeHouse(id, house) {
     if (await app.isOnline(id)) return false;
     await sql('DELETE FROM vrp_user_homes WHERE user_id=? AND home=?', [id,house]);

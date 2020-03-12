@@ -98,7 +98,7 @@ async function isOnline(id) {
   for (let x = 0; x < playerList.length; x++) {
     const player = playerList[x];
     if (player.identifiers.includes(identifier) || player.identifiers.includes(id)) {
-      if (DEBUG) console.log(player.id+' is online!');
+      if (DEBUG) console.log(id+' is online!');
       return true;
     }
   }
@@ -146,9 +146,8 @@ async function sql(sql, values=[]) {
 
 async function asyncOnlineFilter(sales) {
   for (let x = 0; x < sales.length; x++) {
-    const online = (await isOnline(sales[x].player));
+    const online = await isOnline(sales[x].player);
     if (online) sales[x] = null;
-  }
   return sales.filter(e => e != null);
 }
 
