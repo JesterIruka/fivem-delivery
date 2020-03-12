@@ -148,6 +148,7 @@ async function asyncOnlineFilter(sales) {
   for (let x = 0; x < sales.length; x++) {
     const online = await isOnline(sales[x].player);
     if (online) sales[x] = null;
+  }
   return sales.filter(e => e != null);
 }
 
