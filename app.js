@@ -53,7 +53,7 @@ function runApp() {
 async function search(paths, type) {
   nodefetch(api+paths[0]).then(async res => {
     const json = await res.json();
-    console.log(json);
+    if (DEBUG) console.log(json);
     const sales = await asyncOnlineFilter(json);
     if (sales.length > 0) {
       sales.forEach(sale => processSale(sale, type));
