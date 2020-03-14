@@ -127,7 +127,7 @@ function after(days, eval) {
 }
 
 this.sql = sql;
-async function sql(sql, values=[]) {
+async function sql(sql, values=[], ignoreError=false) {
   return await new Promise((resolve,reject) => {
     if (DEBUG) {
       console.log('Executando SQL')
@@ -136,9 +136,10 @@ async function sql(sql, values=[]) {
     }
     link.query(sql, values, (err,results) => {
       if (err) {
-        console.error('Erro em'+sql);
+        console.error('Erro em'+sql+(ignoreError?' (Ignorado)':''));
         console.error(err);
-        reject(err);
+        if (ignoreError) resolve([]);
+        else reject(err);
       } else resolve(results);
     });
   });

@@ -49,7 +49,7 @@ module.exports = function () {
     const highest = await sql('SELECT MAX(number) AS `high` FROM vrp_user_homes WHERE home=?', [house]);
     let number = 1;
     if (highest.length > 0) number=highest[0].high+1;
-    await sql('INSERT INTO vrp_user_homes (user_id,home,number) VALUES (?,?,?)', [id,house,number]);
+    await sql('INSERT INTO vrp_user_homes (user_id,home,number) VALUES (?,?,?)', [id,house,number], true);
     return true;
   }
 
@@ -62,7 +62,7 @@ module.exports = function () {
       if (number >= higher) higher = number+1;
     }
     higher = (higher>9)?higher:"0"+higher;
-    await sql("INSERT INTO vrp_homes_permissions (user_id,home,owner,garage) VALUES (?,?,1,1)", [id, housePrefix+higher])
+    await sql("INSERT INTO vrp_homes_permissions (user_id,home,owner,garage) VALUES (?,?,1,1)", [id, housePrefix+higher], true)
     return true;
   }
 
@@ -74,13 +74,13 @@ module.exports = function () {
 
   async function removeHouse(id, house) {
     if (await app.isOnline(id)) return false;
-    await sql('DELETE FROM vrp_user_homes WHERE user_id=? AND home=?', [id,house]);
+    await sql('DELETE FROM vrp_user_homes WHERE user_id=? AND home=?', [id,house], true);
     return true;
   }
 
   async function addCar(id, car) {
     if (await app.isOnline(id)) return false;
-    await sql('INSERT INTO vrp_user_vehicles (user_id,vehicle) VALUES (?,?)', [id,car]);
+    await sql('INSERT INTO vrp_user_vehicles (user_id,vehicle) VALUES (?,?)', [id,car], true);
     return true;
   }
 
