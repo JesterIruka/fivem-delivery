@@ -1,4 +1,6 @@
-module.exports = function (app) {
+const app = require('../app');
+
+module.exports = function () {
 
   const sql = app.sql;
   const adicionarGrupo = addGroup;
@@ -6,7 +8,7 @@ module.exports = function (app) {
   const adicionarCarro = addCar;
 
   function addGroup(id, group) {
-
+    
   }
 
   function addHouse(id, group) {

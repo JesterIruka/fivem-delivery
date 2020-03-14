@@ -5,8 +5,8 @@ const config = require('./src/config');
 let scheduled = JSON.parse(fs.readFileSync('./scheduled.json'));
 let playerList = [];
 
-const vrp = require('./src/vrp')({sql,isOnline});
-const esx = require('./src/esx')({sql,isOnline});
+const vrp = require('./src/vrp')();
+const esx = require('./src/esx')();
 
 let DEBUG = false;
 
@@ -102,7 +102,7 @@ async function isOnline(id) {
       return true;
     }
   }
-  console.log(id+' is offline');
+  if (DEBUG) console.log(id+' is offline');
   return false;
 }
 
@@ -185,3 +185,5 @@ function eatArrow(obj) {
   if (obj instanceof Function) obj = obj.toString();
   return obj.replace('(','').replace(')', '').replace('=>', '').trimStart();
 }
+
+module.exports = { isOnline, sql, config, DEBUG };

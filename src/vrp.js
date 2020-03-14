@@ -1,4 +1,6 @@
-module.exports = function (app) {
+const app = require('../app');
+
+module.exports = function () {
 
   const sql = app.sql;
   const adicionarGrupo = addGroup;
@@ -15,15 +17,15 @@ module.exports = function (app) {
     const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id='"+id+"' AND dkey='vRP:datatable'");
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
-      console.log(data);
+      if (app.DEBUG) console.log(data);
       if (Array.isArray(data.groups)) {
         data.groups = {};
       }
       data.groups[group] = true;
-      sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'", [JSON.stringify(data), id]);
+      await sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'", [JSON.stringify(data), id]);
       return true;
     } else {
-      console.log('Não foi encontrado nenhum dvalue para '+id);
+      if (app.DEBUG) console.log('Não foi encontrado nenhum dvalue para '+id);
       return false;
     }
   }
@@ -37,7 +39,7 @@ module.exports = function (app) {
       sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'", [JSON.stringify(data), id]);
       return true;
     } else {
-      console.log('Não foi encontrado nenhum dvalue para '+id);
+      if (app.DEBUG) console.log('Não foi encontrado nenhum dvalue para '+id);
       return false;
     }
   }
