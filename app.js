@@ -40,7 +40,7 @@ function runApp() {
 
   const check = async () => {
     playerList = await queryPlayers();
-    if (playerList) {
+    if (Array.isArray(playerList)) {
       await search(['/packages', '/delivery'], 'Aprovado');
       await search(['/refunds', '/punish'], 'Chargeback');
 
@@ -48,6 +48,7 @@ function runApp() {
       saveSchedules();
     } else {
       console.error('Falha ao consultar players.json (Servidor fechado?)');
+      console.error(playerList);
     }
   };
 
@@ -192,8 +193,8 @@ async function queryPlayers() {
   if (config.data.checkForOnlinePlayers) {
     await new Promise((resolve,reject) => {
       nodefetch(config.data.playersJsonUrl).then(res => {
-        res.json().then(res => {
-          resolve(res);
+        res.json().then(arr => {
+          resolve(arr);
         }).catch(err => resolve(false));
       }).catch(err => resolve(false));
     });
