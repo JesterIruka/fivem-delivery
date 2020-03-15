@@ -1,6 +1,4 @@
-const app = require('../app');
-
-module.exports = function () {
+module.exports = function (app) {
 
   const sql = app.sql;
   const adicionarGrupo = addGroup;
