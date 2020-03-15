@@ -39,13 +39,16 @@ function runApp() {
   console.log("> TOKEN: "+config.data.token);
 
   const check = async () => {
-    if (config.data.checkForOnlinePlayers)
-      playerList = await (await nodefetch(config.data.playersJsonUrl)).json();
-    await search(['/packages', '/delivery'], 'Aprovado');
-    await search(['/refunds', '/punish'], 'Chargeback');
+    playerList = await queryPlayers();
+    if (playerList) {
+      await search(['/packages', '/delivery'], 'Aprovado');
+      await search(['/refunds', '/punish'], 'Chargeback');
 
-    await readSchedules();
-    saveSchedules();
+      await readSchedules();
+      saveSchedules();
+    } else {
+      console.error('Falha ao consultar players.json (Servidor fechado?)');
+    }
   };
 
   check();
@@ -183,4 +186,16 @@ function uuidv4() {
 function eatArrow(obj) {
   if (obj instanceof Function) obj = obj.toString();
   return obj.replace('(','').replace(')', '').replace('=>', '').trimStart();
+}
+
+async function queryPlayers() {
+  if (config.data.checkForOnlinePlayers) {
+    await new Promise((resolve,reject) => {
+      nodefetch(config.data.playersJsonUrl).then(res => {
+        res.json().then(res => {
+          resolve(res);
+        }).catch(err => resolve(false));
+      }).catch(err => resolve(false));
+    });
+  } else return [];
 }
