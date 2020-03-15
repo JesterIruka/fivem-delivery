@@ -191,7 +191,7 @@ function eatArrow(obj) {
 
 async function queryPlayers() {
   if (config.data.checkForOnlinePlayers) {
-    await new Promise((resolve,reject) => {
+    return await new Promise((resolve,reject) => {
       nodefetch(config.data.playersJsonUrl).then(res => {
         res.json().then(arr => {
           resolve(arr);
