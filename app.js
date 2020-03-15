@@ -111,13 +111,8 @@ async function isOnline(id) {
 function after(days, eval) {
   if (eval instanceof Function) eval = eatArrow(eval.toString());
   const now = new Date().getTime();
-  const expires = (86400000*days);
   if (task = scheduled.find(task=>task.eval==eval)) {
-    if (task.date > now) { //acumular tempo de vip e outras coisas
-      task.date = task.date + expires;
-    } else {
-      task.date = now + expires;
-    }
+    task.date = now + expires+(86400000*days);
   } else {
     scheduled.push({uid:uuidv4(),date:(now+expires),eval});
   }
