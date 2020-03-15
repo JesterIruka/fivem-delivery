@@ -5,15 +5,15 @@ const config = require('./src/config');
 let scheduled = JSON.parse(fs.readFileSync('./scheduled.json'));
 let playerList = [];
 
-let mod = { isOnline, sql, config, DEBUG };
-
-const vrp = require('./src/vrp')(mod);
-const esx = require('./src/esx')(mod);
-
 let DEBUG = false;
 
 let link;
 let api;
+
+let mod = { isOnline, sql, config, DEBUG };
+
+const vrp = require('./src/vrp')(mod);
+const esx = require('./src/esx')(mod);
 
 if (config.exists()) {
   config.data = config.read();
