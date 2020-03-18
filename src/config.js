@@ -18,7 +18,8 @@ function create() {
     port:3306,
     database:'fivem',
     user:'root',
-    password:''
+    password:'',
+    extras:{}
   }, null, 4));
 }
 

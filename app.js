@@ -95,6 +95,10 @@ function processSale(sale, type) {
 async function isOnline(id) {
   let identifier = 'steam:'+id;
   if (parseInt(id) > 0) {
+    if (config.data.extras && config.data.extras.vrp_users_online) {
+      res = await sql("SELECT * FROM vrp_users_online WHERE user_id=?", [id]);
+      return res.length > 0;
+    }
     res = await sql("SELECT `identifier` FROM vrp_user_ids WHERE user_id=? AND identifier LIKE 'license:%'", [id])
     if (res.length == 0) {
       if (DEBUG) console.log('Não foi possível encontrar o identifier de '+id);
