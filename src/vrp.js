@@ -1,3 +1,5 @@
+const webhook = require('./webhook');
+
 module.exports = function (app) {
 
   const sql = app.sql;
@@ -15,7 +17,7 @@ module.exports = function (app) {
     const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id='"+id+"' AND dkey='vRP:datatable'");
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
-      if (app.DEBUG) console.log(data);
+      webhook.debug("Grupos antigos: "+JSON.stringify(data.groups));
       if (Array.isArray(data.groups)) {
         data.groups = {};
       }
@@ -23,7 +25,7 @@ module.exports = function (app) {
       await sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'", [JSON.stringify(data), id]);
       return true;
     } else {
-      if (app.DEBUG) console.log('Não foi encontrado nenhum dvalue para '+id);
+      webhook.debug('Não foi encontrado nenhum dvalue para '+id);
       return false;
     }
   }
@@ -37,7 +39,7 @@ module.exports = function (app) {
       sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'", [JSON.stringify(data), id]);
       return true;
     } else {
-      if (app.DEBUG) console.log('Não foi encontrado nenhum dvalue para '+id);
+      webhook.debug('Não foi encontrado nenhum dvalue para '+id);
       return false;
     }
   }

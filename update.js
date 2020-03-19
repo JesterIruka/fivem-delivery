@@ -1,7 +1,7 @@
 const fs = require('fs');
 const nodefetch = require('node-fetch').default;
 
-const find = ['app.js', 'src/vrp.js', 'src/esx.js', 'src/config.js'];
+const find = ['app.js', 'src/vrp.js', 'src/esx.js', 'src/config.js', 'src/webhook.js'];
 
 
 const baseURL = 'https://raw.githubusercontent.com/JesterIruka/fivem-delivery/master/';

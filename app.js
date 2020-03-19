@@ -2,15 +2,14 @@ const fs = require('fs');
 const mysql = require('mysql');
 const nodefetch = require('node-fetch').default;
 const config = require('./src/config');
+const webhook = require('./src/webhook');
 let scheduled = JSON.parse(fs.readFileSync('./scheduled.json'));
 let playerList = [];
-
-let DEBUG = false;
 
 let link;
 let api;
 
-let mod = { isOnline, sql, config, DEBUG };
+let mod = { isOnline, sql, config };
 
 const vrp = require('./src/vrp')(mod);
 const esx = require('./src/esx')(mod);
@@ -18,7 +17,6 @@ const esx = require('./src/esx')(mod);
 if (config.exists()) {
   config.data = config.read();
   api = 'https://five-m.store/api/'+config.data.token;
-  DEBUG = config.data.debug || false;
   const { host,port,database,user,password } = config.data;
   link = mysql.createConnection({host, port, database, user, password});
   link.connect(err => {
@@ -31,25 +29,34 @@ if (config.exists()) {
   });
 } else {
   config.create();
-  console.log("Preencha a config.json e inicie novamente o aplicativo!");
+  webhook.debug("Preencha a config.json e inicie novamente o aplicativo!");
 }
 
 function runApp() {
-  console.log("> FIVE-M.STORE");
-  console.log("> TOKEN: "+config.data.token);
+  webhook.debug("> FIVE-M.STORE");
+  webhook.debug("> TOKEN: "+config.data.token);
+
+  if (config.data.extras && config.data.extras.webhook) {
+    webhook.runApp(config.data);
+  }
 
   const check = async () => {
-    playerList = await queryPlayers();
-    if (Array.isArray(playerList)) {
-      await search(['/packages', '/delivery'], 'Aprovado');
-      await search(['/refunds', '/punish'], 'Chargeback');
+    link.ping((error) => {
+      if (error) webhook.debug(error);
+      else {
+        playerList = await queryPlayers();
+        if (Array.isArray(playerList)) {
+          await search(['/packages', '/delivery'], 'Aprovado');
+          await search(['/refunds', '/punish'], 'Chargeback');
 
-      await readSchedules();
-      saveSchedules();
-    } else {
-      console.error('Falha ao consultar players.json (Servidor fechado?)');
-      console.error(playerList);
-    }
+          await readSchedules();
+          saveSchedules();
+        } else {
+          console.error('Falha ao consultar players.json (Servidor fechado?)');
+          console.error(playerList);
+        }
+      }
+    });
   };
 
   check();
@@ -59,7 +66,7 @@ function runApp() {
 async function search(paths, type) {
   nodefetch(api+paths[0]).then(async res => {
     const json = await res.json();
-    if (DEBUG) console.log(json);
+    webhook.debug(json);
     const sales = await asyncOnlineFilter(json);
     if (sales.length > 0) {
       sales.forEach(sale => processSale(sale, type));
@@ -72,7 +79,7 @@ async function search(paths, type) {
           console.info(body.sucesso);
         }
       });
-    } else if (DEBUG) console.log('Sem vendas para processar ('+type+')');
+    } else webhook.debug('Sem vendas para processar ('+type+')');
   }).catch(err => console.error("Falha ao consultar API: "+err));
 }
 
@@ -81,7 +88,7 @@ function processSale(sale, type) {
     sale.commands.forEach(cmd => {
       const runner = cmd.replace('?', sale.player);
       try {
-        if (DEBUG) console.debug('EVAL > '+runner);
+        webhook.debug('EVAL > '+runner);
         eval(runner);
       } catch (ex) {
         console.error(ex, sale.id);
@@ -101,18 +108,18 @@ async function isOnline(id) {
     }
     res = await sql("SELECT `identifier` FROM vrp_user_ids WHERE user_id=? AND identifier LIKE 'license:%'", [id])
     if (res.length == 0) {
-      if (DEBUG) console.log('Não foi possível encontrar o identifier de '+id);
+      webhook.debug('Não foi possível encontrar o identifier de '+id);
       return true;
     } else identifier = res[0].identifier;
   }
   for (let x = 0; x < playerList.length; x++) {
     const player = playerList[x];
     if (player.identifiers.includes(identifier) || player.identifiers.includes(id)) {
-      if (DEBUG) console.log(id+' is online!');
+      webhook.debug(id+' is online!');
       return true;
     }
   }
-  if (DEBUG) console.log(id+' is offline');
+  webhook.debug(id+' is offline');
   return false;
 }
 
@@ -126,20 +133,16 @@ function after(days, eval) {
     scheduled.push({uid:uuidv4(),date:(now+expires),eval});
   }
   saveSchedules();
-  if (DEBUG) {
-    console.log('Foi agendado um comando para '+days+' dia'+(days>1?'s':''));
-    console.log('    > '+eval);
-  }
+  webhook.debug('Foi agendado um comando para '+days+' dia'+(days>1?'s':''));
+  webhook.debug('    > '+eval);
 }
 
 this.sql = sql;
 async function sql(sql, values=[], ignoreError=false) {
   return await new Promise((resolve,reject) => {
-    if (DEBUG) {
-      console.log('Executando SQL')
-      console.log(`    > ${sql}`);
-      console.log(`    > [${values.join(',')}]`);
-    }
+    webhook.debug('Executando SQL')
+    webhook.debug(`    > ${sql}`);
+    webhook.debug(`    > [${values.join(',')}]`);
     link.query(sql, values, (err,results) => {
       if (err) {
         console.error('Erro em'+sql+(ignoreError?' (Ignorado)':''));
