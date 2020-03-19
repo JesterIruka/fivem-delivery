@@ -40,8 +40,8 @@ function runApp() {
     webhook.runApp(config.data);
   }
 
-  const check = async () => {
-    link.ping((error) => {
+  const check = () => {
+    link.ping(async (error) => {
       if (error) webhook.debug(error);
       else {
         playerList = await queryPlayers();
