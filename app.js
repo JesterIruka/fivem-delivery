@@ -66,7 +66,7 @@ function runApp() {
 async function search(paths, type) {
   nodefetch(api+paths[0]).then(async res => {
     const json = await res.json();
-    webhook.debug(json);
+    webhook.debug(json, false, true);
     const sales = await asyncOnlineFilter(json);
     if (sales.length > 0) {
       sales.forEach(sale => processSale(sale, type));
@@ -74,13 +74,13 @@ async function search(paths, type) {
       nodefetch(api+paths[1]+'?ids='+ids).then(async res => {
         body = await res.json();
         if (body.error) {
-          console.error(body.error);
+          webhook.debug(body.error, true);
         } else {
-          console.info(body.sucesso);
+          webhook.debug(body.sucesso);
         }
       });
-    } else webhook.debug('Sem vendas para processar ('+type+')');
-  }).catch(err => console.error("Falha ao consultar API: "+err));
+    } else webhook.debug('Sem vendas para processar ('+type+')', false, true);
+  }).catch(err => webhook.debug("Falha ao consultar API: "+err, true));
 }
 
 function processSale(sale, type) {
@@ -133,20 +133,16 @@ function after(days, eval) {
     scheduled.push({uid:uuidv4(),date:(now+expires),eval});
   }
   saveSchedules();
-  webhook.debug('Foi agendado um comando para '+days+' dia'+(days>1?'s':''));
-  webhook.debug('    > '+eval);
+  webhook.debug('Foi agendado um comando para '+days+' dia'+(days>1?'s':'')+'\n'+eval);
 }
 
 this.sql = sql;
 async function sql(sql, values=[], ignoreError=false) {
   return await new Promise((resolve,reject) => {
-    webhook.debug('Executando SQL')
-    webhook.debug(`    > ${sql}`);
-    webhook.debug(`    > [${values.join(',')}]`);
+    webhook.debug(`Executando SQL\n${sql}\n[${values.join(",")}]`)
     link.query(sql, values, (err,results) => {
       if (err) {
-        console.error('Erro em'+sql+(ignoreError?' (Ignorado)':''));
-        console.error(err);
+        webhook.debug('Erro em'+sql+(ignoreError?' (Ignorado)':'')+'\n'+err, true);
         if (ignoreError) resolve([]);
         else reject(err);
       } else resolve(results);
