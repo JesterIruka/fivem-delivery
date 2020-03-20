@@ -29,7 +29,7 @@ if (config.exists()) {
   });
 } else {
   config.create();
-  webhook.debug("Preencha a config.json e inicie novamente o aplicativo!");
+  console.log("Preencha a config.json e inicie novamente o aplicativo!");
 }
 
 function runApp() {
