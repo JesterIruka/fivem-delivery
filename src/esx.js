@@ -78,8 +78,7 @@ module.exports = function (app) {
   }
   
   return {
-    adicionarGrupo, addGroup,
-    removerGrupo, removeGroup,
+    setarGrupo, setGroup,
     adicionarCasa, addHouse,
     removerCasa, removeHouse,
     adicionarCarro, addCar,
