@@ -9,6 +9,7 @@ module.exports = function (app) {
   const adicionarCarro = addCar;
   const removerCarro = removeCar;
   const adicionarDinheiro = addMoney;
+  const adicionarBanco = addBank;
 
   const letters = 'QWERTYUIOPASDFGHJKLZXCVBNM'.split('');
   const numbers = '0123456789'.split('');
@@ -53,7 +54,12 @@ module.exports = function (app) {
   }
 
   async function addMoney(id, money) {
-    await sql("UPDATE users SET money=money+? WHERE identifier=?", [money,id]);
+    await sql("UPDATE users SET money=money+? WHERE identifier=?", [money,steamHex(id)]);
+    return true;
+  }
+
+  async function addBank(id, bank) {
+    await sql("UPDATE users SET bank=bank+? WHERE identifier=?", [bank,steamHex(id)]);
     return true;
   }
 
@@ -78,6 +84,7 @@ module.exports = function (app) {
     removerCasa, removeHouse,
     adicionarCarro, addCar,
     removerCarro, removeCar,
-    addMoney, adicionarDinheiro
+    addMoney, adicionarDinheiro,
+    addBank, adicionarBanco
   };
 }
