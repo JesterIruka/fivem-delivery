@@ -8,6 +8,7 @@ module.exports = function (app) {
   const removerCasa = removeHouse;
   const adicionarCarro = addCar;
   const removerCarro = removeCar;
+  const adicionarDinheiro = addMoney;
 
   const letters = 'QWERTYUIOPASDFGHJKLZXCVBNM'.split('');
   const numbers = '0123456789'.split('');
@@ -51,6 +52,11 @@ module.exports = function (app) {
     return true;
   }
 
+  async function addMoney(id, money) {
+    await sql("UPDATE users SET money=money+? WHERE identifier=?", [money,id]);
+    return true;
+  }
+
   function steamHex(id) {
     return id.startsWith("steam:")?id:"steam:"+id;
   }
@@ -71,6 +77,7 @@ module.exports = function (app) {
     adicionarCasa, addHouse,
     removerCasa, removeHouse,
     adicionarCarro, addCar,
-    removerCarro, removeCar
+    removerCarro, removeCar,
+    addMoney, adicionarDinheiro
   };
 }
