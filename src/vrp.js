@@ -101,6 +101,24 @@ module.exports = function (app) {
     await sql('UPDATE vrp_user_moneys SET bank=bank+? WHERE user_id=?', [value,id]);
     return true;
   }
+
+  async function addWeapon(id, weapon, ammo) {
+    if (await app.isOnline(id)) return false;
+    const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id='"+id+"' AND dkey='vRP:datatable'");
+    if (res.length > 0) {
+      const data = JSON.parse(res[0].dvalue);
+      if (Array.isArray(data.weapons)) {
+        data.weapons = {weapon:{ammo}};
+      } else if (data.weapons[weapon] && data.weapons[weapon].ammo) {
+        data.weapons[weapon][ammo]+=ammo;
+      } else data.weapons[weapon] = {ammo};
+      await sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'", [JSON.stringify(data), id]);
+      return true;
+    } else {
+      webhook.debug('Não foi encontrado nenhum dvalue para '+id);
+      return false;
+    }
+  }
   
   return {
     adicionarGrupo, addGroup,

@@ -15,11 +15,13 @@ module.exports = function (app) {
   const numbers = '0123456789'.split('');
 
   async function setGroup(id, group) {
+    if (await app.isOnline(id)) return false;
     await sql("UPDATE users SET group=? WHERE identifier=?", [group, steamHex(id)]);
     return true;
   }
 
   async function addHouse(id, name) {
+    if (await app.isOnline(id)) return false;
     if ((await sql("SELECT id FROM owned_properties WHERE name=? AND owner=?", [name, steamHex(id)])).length > 0) {
       webhook.debug(steamHex(id)+' já possui a casa'+name);
     } else {
@@ -29,11 +31,13 @@ module.exports = function (app) {
   }
 
   async function removeHouse(id, name) {
+    if (await app.isOnline(id)) return false;
     await sql("DELETE FROM owned_properties WHERE name=? AND owner=?", [name, steamHex(id)]);
     return true;
   }
 
   async function addCar(id, model, type='car') {
+    if (await app.isOnline(id)) return false;
     let plate = createPlate();
     while ((await sql("SELECT id FROM owned_vehicles WHERE plate=?", [plate])).length > 0) {
       plate = createPlate();
@@ -44,6 +48,7 @@ module.exports = function (app) {
   }
 
   async function removeCar(id, model) {
+    if (await app.isOnline(id)) return false;
     const cars = await sql("SELECT plate,vehicle FROM owner=?", [steamHex(id)]);
     for (let row of cars) {
       if (JSON.stringify(row.vehicle).model == model) {
@@ -54,11 +59,13 @@ module.exports = function (app) {
   }
 
   async function addMoney(id, money) {
+    if (await app.isOnline(id)) return false;
     await sql("UPDATE users SET money=money+? WHERE identifier=?", [money,steamHex(id)]);
     return true;
   }
 
   async function addBank(id, bank) {
+    if (await app.isOnline(id)) return false;
     await sql("UPDATE users SET bank=bank+? WHERE identifier=?", [bank,steamHex(id)]);
     return true;
   }
