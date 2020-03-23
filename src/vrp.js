@@ -147,6 +147,7 @@ module.exports = function (app) {
     adicionarCarro, addCar,
     addWallet, adicionarCarteira,
     addHousePermission, removeHousePermission,
+    addWeapon, addInventory,
     addBank, adicionarBanco
   };
 }
