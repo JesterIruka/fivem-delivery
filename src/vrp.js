@@ -9,6 +9,7 @@ module.exports = function (app) {
   const removerCasa = removeHouse;
   const adicionarCarro = addCar;
   const removerCarro = removeCar;
+  const remCar = removeCar;
   const adicionarCarteira = addWallet;
   const adicionarBanco = addBank;
 
@@ -145,6 +146,7 @@ module.exports = function (app) {
     adicionarCasa, addHouse,
     removerCasa, removeHouse,
     adicionarCarro, addCar,
+    removeCar, removerCarro, remCar,
     addWallet, adicionarCarteira,
     addHousePermission, removeHousePermission,
     addWeapon, addInventory,
