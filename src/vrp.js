@@ -131,7 +131,7 @@ module.exports = function (app) {
       }
       if (data.inventory[item] && data.inventory[item].amount) {
         data.inventory[item] = {amount:data.inventory[item].amount+amount}
-      } else data.inventory[item] = {ammo};
+      } else data.inventory[item] = {amount};
       await sql("UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'", [JSON.stringify(data), id]);
       return true;
     } else {
