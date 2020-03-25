@@ -69,7 +69,9 @@ async function search(paths, type) {
     webhook.debug(json, false, true);
     const sales = await asyncOnlineFilter(json);
     if (sales.length > 0) {
-      sales.forEach(sale => processSale(sale, type));
+      for (let sale of sales) {
+        await processSale(sale, type);
+      }
       const ids = sales.map(s => s.id).join(',');
       nodefetch(api+paths[1]+'?ids='+ids).then(async res => {
         body = await res.json();
@@ -83,17 +85,17 @@ async function search(paths, type) {
   }).catch(err => webhook.debug("Falha ao consultar API: "+err, true));
 }
 
-function processSale(sale, type) {
+async function processSale(sale, type) {
   if (sale.commands.length > 0) {
-    sale.commands.forEach(cmd => {
+    for (let cmd of sale.commands) {
       const runner = cmd.replace('?', sale.player);
       try {
         webhook.debug('EVAL > '+runner);
-        eval(runner);
+        await eval(runner);
       } catch (ex) {
         console.error(ex, sale.id);
       }
-    })
+    }
   } else {
     console.info("O pedido "+sale.id+" não possui comandos para serem executados ("+type+")");
   }
