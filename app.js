@@ -88,7 +88,7 @@ async function search(paths, type) {
 async function processSale(sale, type) {
   if (sale.commands.length > 0) {
     for (let cmd of sale.commands) {
-      const runner = cmd.replace('?', sale.player);
+      const runner = cmd.replace(/\?/g, sale.player);
       try {
         webhook.debug('EVAL > '+runner);
         await eval(runner);
