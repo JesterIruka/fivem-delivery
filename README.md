@@ -10,6 +10,8 @@ Aplicativo entregador da five-m.store
 
 **Este webhook manda mensagens informando a situação de alguns pedidos, por isso é importante deixar o canal do webhook com acesso restrito aos administradores do servidor**
 
+Exemplo na config.json
+
 ```json
     "discord_webhook": "https://discordapp.com/api/webhooks/........."
 ```
