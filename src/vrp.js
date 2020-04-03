@@ -1,20 +1,17 @@
 const webhook = require('./webhook');
+const { sql } = require('./database');
+const { isOnline } = require('../api');
+const { after } = require('./scheduler');
 
-module.exports = function (app) {
+class VRP {
 
-  const sql = app.sql;
-  const adicionarGrupo = addGroup;
-  const removerGrupo = removeGroup;
-  const adicionarCasa = addHouse;
-  const removerCasa = removeHouse;
-  const adicionarCarro = addCar;
-  const removerCarro = removeCar;
-  const remCar = removeCar;
-  const adicionarCarteira = addWallet;
-  const adicionarBanco = addBank;
+  async addTemporaryGroup(days, id, group) {
+    after(days, `vrp.removeGroup("${id}", "${group}")`);
+    await this.addGroup(id, group);
+  }
 
-  async function addGroup(id, group) {
-    if (await app.isOnline(id)) return false;
+  async addGroup(id, group) {
+    if (await isOnline(id)) return false;
     const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id='"+id+"' AND dkey='vRP:datatable'");
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
@@ -31,8 +28,8 @@ module.exports = function (app) {
     }
   }
 
-  async function removeGroup(id, group) {
-    if (await app.isOnline(id)) return false;
+  async removeGroup(id, group) {
+    if (await isOnline(id)) return false;
     const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id=? AND dkey='vRP:datatable'", [id]);
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
@@ -45,8 +42,13 @@ module.exports = function (app) {
     }
   }
 
-  async function addHouse(id, house) {
-    if (await app.isOnline(id)) return false;
+  async addTemporaryHouse(days, id, house) {
+    after(days, `vrp.removeHouse("${id}", "${house}")`);
+    await this.addHouse(id, house);
+  }
+
+  async addHouse(id, house) {
+    if (await isOnline(id)) return false;
     const highest = await sql('SELECT MAX(number) AS `high` FROM vrp_user_homes WHERE home=?', [house]);
     let number = 1;
     if (highest.length > 0) number=highest[0].high+1;
@@ -54,8 +56,19 @@ module.exports = function (app) {
     return true;
   }
 
-  async function addHousePermission(id, housePrefix) {
-    if (await app.isOnline(id)) return false;
+  async removeHouse(id, house) {
+    if (await isOnline(id)) return false;
+    await sql('DELETE FROM vrp_user_homes WHERE user_id=? AND home=?', [id,house], true);
+    return true;
+  }
+
+  async addTemporaryHousePermission(days, id, housePrefix) {
+    after(days, `vrp.removeHousePermission("${id}", "${housePrefix}")`);
+    await this.addHousePermission(id, housePrefix);
+  }
+
+  async addHousePermission(id, housePrefix) {
+    if (await isOnline(id)) return false;
     const rows = await sql(`SELECT home FROM vrp_homes_permissions WHERE home LIKE '${housePrefix}%'`);
     let higher = 1;
     for (let row of rows) {
@@ -67,44 +80,43 @@ module.exports = function (app) {
     return true;
   }
 
-  async function removeHousePermission(id, housePrefix) {
-    if (await app.isOnline(id)) return false;
+  async removeHousePermission(id, housePrefix) {
+    if (await isOnline(id)) return false;
     await sql(`DELETE FROM vrp_homes_permissions WHERE user_id=? AND home LIKE '${housePrefix}%' AND owner>0`);
     return true;
   }
 
-  async function removeHouse(id, house) {
-    if (await app.isOnline(id)) return false;
-    await sql('DELETE FROM vrp_user_homes WHERE user_id=? AND home=?', [id,house], true);
-    return true;
+  async addTemporaryCar(days, id, car) {
+    after(days, `vrp.removeCar("${id}", "${car}")`);
+    await this.addCar(id, car);
   }
 
-  async function addCar(id, car) {
-    if (await app.isOnline(id)) return false;
+  async addCar(id, car) {
+    if (await isOnline(id)) return false;
     await sql('INSERT INTO vrp_user_vehicles (user_id,vehicle) VALUES (?,?)', [id,car], true);
     return true;
   }
 
-  async function removeCar(id, car) {
-    if (await app.isOnline(id)) return false;
+  async removeCar(id, car) {
+    if (await isOnline(id)) return false;
     await sql('DELETE FROM vrp_user_vehicles WHERE user_id=? AND vehicle=?', [id,car]);
     return true;
   }
 
-  async function addWallet(id, value) {
-    if (await app.isOnline(id)) return false;
+  async addWallet(id, value) {
+    if (await isOnline(id)) return false;
     await sql('UPDATE vrp_user_moneys SET wallet=wallet+? WHERE user_id=?', [value,id]);
     return true;
   }
 
-  async function addBank(id, value) {
-    if (await app.isOnline(id)) return false;
+  async addBank(id, value) {
+    if (await isOnline(id)) return false;
     await sql('UPDATE vrp_user_moneys SET bank=bank+? WHERE user_id=?', [value,id]);
     return true;
   }
 
-  async function addWeapon(id, weapon, ammo) {
-    if (await app.isOnline(id)) return false;
+  async addWeapon(id, weapon, ammo) {
+    if (await isOnline(id)) return false;
     const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id='"+id+"' AND dkey='vRP:datatable'");
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
@@ -121,8 +133,8 @@ module.exports = function (app) {
     }
   }
 
-  async function addInventory(id, item, amount) {
-    if (await app.isOnline(id)) return false;
+  async addInventory(id, item, amount) {
+    if (await isOnline(id)) return false;
     const res = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id='"+id+"' AND dkey='vRP:datatable'");
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
@@ -138,18 +150,7 @@ module.exports = function (app) {
       webhook.debug('Não foi encontrado nenhum dvalue para '+id);
       return false;
     }
-  }
-  
-  return {
-    adicionarGrupo, addGroup,
-    removerGrupo, removeGroup,
-    adicionarCasa, addHouse,
-    removerCasa, removeHouse,
-    adicionarCarro, addCar,
-    removeCar, removerCarro, remCar,
-    addWallet, adicionarCarteira,
-    addHousePermission, removeHousePermission,
-    addWeapon, addInventory,
-    addBank, adicionarBanco
-  };
+  } 
 }
+
+module.exports = new VRP();

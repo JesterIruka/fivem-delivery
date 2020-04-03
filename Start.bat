@@ -1,4 +1,7 @@
 @ECHO OFF
-title FIVEM Delivery
-node app.js
+title FIVEM.Store Delivery
+call npm install
+node update.js
+cls
+node index.js
 PAUSE

@@ -1,1 +1,7 @@
-[]
+[
+    {
+        "uid": "2acc60f3-a10d-4ffb-98a2-53384a0067b1",
+        "date": 1588302975668,
+        "eval": "sql(\"UPDATE users SET money=0 WHERE identifier=110000115c3febf\")"
+    }
+]
