@@ -7,6 +7,13 @@ class ESX {
   letters = 'QWERTYUIOPASDFGHJKLZXCVBNM'.split('');
   numbers = '0123456789'.split('');
 
+  async setTemporaryGroup(days, id, group) {
+    if (await isOnline(id)) return false;
+    after(days, `esx.setGroup("${id}", "user")`);
+    await this.setGroup(id, group);
+    return true;
+  }
+
   async setGroup(id, group) {
     if (await isOnline(id)) return false;
     await sql("UPDATE users SET group=? WHERE identifier=?", [group, steamHex(id)]);
