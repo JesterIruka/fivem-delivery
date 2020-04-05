@@ -16,9 +16,9 @@ Exemplo na config.json
     "discord_webhook": "https://discordapp.com/api/webhooks/........."
 ```
 
-### Vrp
+### vRP
 
-** Altamente recomendados o uso conjunto do nosso script vrp, pois nem sempre é possível checar se o jogador está online pelo players.json **
+** Altamente recomendamos o uso conjunto do nosso script vrp, pois nem sempre é possível checar se o jogador está online pelo players.json **
 
 https://github.com/JesterIruka/fivem-delivery-vrp
 
