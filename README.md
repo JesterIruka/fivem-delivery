@@ -16,5 +16,21 @@ Exemplo na config.json
     "discord_webhook": "https://discordapp.com/api/webhooks/........."
 ```
 
+### Vrp
+
+** Altamente recomendados o uso conjunto do nosso script vrp, pois nem sempre é possível checar se o jogador está online pelo players.json **
+
+https://github.com/JesterIruka/fivem-delivery-vrp
+
+1. Instale o script (configure o config.json do script se necessário)
+2. Insira na sua config.json do aplicativo
+
+```json
+    "fstore_online": true
+```
+
 
 *Qualquer sugestão pode ser feita através de pull requests*
+*Qualquer dúvida pode ser esclarecida em nossa discord através de um ticket*
+
+https://discord.gg/FUcKDQw
