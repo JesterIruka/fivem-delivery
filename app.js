@@ -1,4 +1,4 @@
-const {link, sql} = require('./src/database');
+const {link, sql, getTables} = require('./src/database');
 const config = require('./src/config');
 
 const api = require('./api');

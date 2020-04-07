@@ -17,4 +17,13 @@ async function sql(sql, values=[], ignoreError=false) {
   });
 }
 
-module.exports = {sql, link};
+let tables = [];
+
+async function queryTables() {
+  const res = await sql("SELECT table_name FROM information_schema.tables WHERE table_schema=?", [config.database]);
+  res.forEach(t => tables.push(t.table_name));
+}
+
+const getTables = () => tables;
+
+module.exports = {sql, link, queryTables, getTables};

@@ -6,6 +6,6 @@ db.link.connect((err) => {
     console.error('Não foi possível se conectar ao banco de dados');
     console.error(err.code);
   } else {
-    app.run();
+    db.queryTables().then(() => app.run());
   }
 });

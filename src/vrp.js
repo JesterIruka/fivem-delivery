@@ -1,5 +1,5 @@
 const webhook = require('./webhook');
-const { sql } = require('./database');
+const { sql, getTables } = require('./database');
 const { isOnline } = require('../api');
 const { after } = require('./scheduler');
 
@@ -93,7 +93,11 @@ class VRP {
 
   async addCar(id, car) {
     if (await isOnline(id)) return false;
-    await sql('INSERT INTO vrp_user_vehicles (user_id,vehicle) VALUES (?,?)', [id,car], true);
+    if (getTables().includes("vrp_vehicles")) {
+      await sql("INSERT INTO vrp_vehicles (user_id,vehicle) VALUES (?,?)", [id, car], true);
+    } else {
+      await sql('INSERT INTO vrp_user_vehicles (user_id,vehicle) VALUES (?,?)', [id,car], true);
+    }
     return true;
   }
 
