@@ -37,7 +37,7 @@ class API {
     let identifier = 'steam:'+id;
     /* VRP */
     if (typeof id === 'number' || id.match(/^[0-9]+$/g)) {
-      if (config.fstore_online) {
+      if (getTables().includes('fstore_online')) {
         const res = await sql("SELECT id FROM fstore_online WHERE id=?", [id]);
         return res.length > 0;
       } else if (config.extras && config.extras.vrp_users_online) {
