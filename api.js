@@ -1,6 +1,6 @@
 const nodefetch = require('node-fetch').default;
 const config = require('./src/config');
-const { sql } = require('./src/database');
+const { sql, getTables } = require('./src/database');
 const webhook = require('./src/webhook');
 
 let playerList = [];
