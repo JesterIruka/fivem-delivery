@@ -2,6 +2,13 @@ const webhook = require('./webhook');
 const { isOnline } = require('../api');
 const { sql } = require('./database');
 
+const garages = {
+  car:'Garage_Centre',
+  boat:'BoatGarage_Centre',
+  helicopter:'AirplaneGarage_Centre',
+  airplane:'AirplaneGarage_Centre'
+};
+
 class ESX {
 
   letters = 'QWERTYUIOPASDFGHJKLZXCVBNM'.split('');
@@ -16,7 +23,7 @@ class ESX {
 
   async setGroup(id, group) {
     if (await isOnline(id)) return false;
-    await sql("UPDATE users SET group=? WHERE identifier=?", [group, steamHex(id)]);
+    await sql("UPDATE users SET group=? WHERE identifier=?", [group, this.steamHex(id)]);
     return true;
   }
 
@@ -27,17 +34,17 @@ class ESX {
 
   async addHouse(id, name) {
     if (await isOnline(id)) return false;
-    if ((await sql("SELECT id FROM owned_properties WHERE name=? AND owner=?", [name, steamHex(id)])).length > 0) {
-      webhook.debug(steamHex(id)+' já possui a casa'+name);
+    if ((await sql("SELECT id FROM owned_properties WHERE name=? AND owner=?", [name, this.steamHex(id)])).length > 0) {
+      webhook.debug(this.steamHex(id)+' já possui a casa'+name);
     } else {
-      await sql("INSERT INTO owned_properties (name,price,rented,owner) VALUES (?,?,?,?)", [name, 0, 0, steamHex(id)]);
+      await sql("INSERT INTO owned_properties (name,price,rented,owner) VALUES (?,?,?,?)", [name, 0, 0, this.steamHex(id)]);
     }
     return true;
   }
 
   async removeHouse(id, name) {
     if (await isOnline(id)) return false;
-    await sql("DELETE FROM owned_properties WHERE name=? AND owner=?", [name, steamHex(id)]);
+    await sql("DELETE FROM owned_properties WHERE name=? AND owner=?", [name, this.steamHex(id)]);
     return true;
   }
 
@@ -52,14 +59,16 @@ class ESX {
     while ((await sql("SELECT id FROM owned_vehicles WHERE plate=?", [plate])).length > 0) {
       plate = createPlate();
     }
-    const values = [steamHex(id), 1, plate, createCar(plate, model), type, '', 0];
-    await sql("INSERT INTO owned_vehicles (owner,state,plate,vehicle,type,job,price) VALUES (?,?,?,?,?,?,?)", values);
+    let garage = garages[type.toLowerCase()];
+    const values = [this.steamHex(id), 1, plate, createCar(plate, model), 'voiture', type, '', 0, garage];
+    const keys = ['owner', 'state', 'plate', 'vehicle', 'vehicle_name', 'type', 'job', 'price', 'garage_name'];
+    await sql(`INSERT INTO owned_vehicles (${keys.join(',')}) VALUES (${values.map(v=>'?').join(',')})`, values);
     return true;
   }
 
   async removeCar(id, model) {
-    if (await app.isOnline(id)) return false;
-    const cars = await sql("SELECT plate,vehicle FROM owner=?", [steamHex(id)]);
+    if (await isOnline(id)) return false;
+    const cars = await sql("SELECT plate,vehicle FROM owner=?", [this.steamHex(id)]);
     for (let row of cars) {
       if (JSON.stringify(row.vehicle).model == model) {
         await sql("DELETE FROM owned_vehicles WHERE plate=?", [row.plate]);
@@ -69,14 +78,25 @@ class ESX {
   }
 
   async addMoney(id, money) {
-    if (await app.isOnline(id)) return false;
-    await sql("UPDATE users SET money=money+? WHERE identifier=?", [money,steamHex(id)]);
+    if (await isOnline(id)) return false;
+    await sql("UPDATE users SET money=money+? WHERE identifier=?", [money,this.steamHex(id)]);
     return true;
   }
 
   async addBank(id, bank) {
-    if (await app.isOnline(id)) return false;
-    await sql("UPDATE users SET bank=bank+? WHERE identifier=?", [bank,steamHex(id)]);
+    if (await isOnline(id)) return false;
+    await sql("UPDATE users SET bank=bank+? WHERE identifier=?", [bank,this.steamHex(id)]);
+    return true;
+  }
+
+  async addInventory(id, item, count) {
+    if (await isOnline(id)) return false;
+    const [row] = sql("SELECT id FROM user_inventory WHERE identifier=? AND item=? LIMIT 1", [this.steamHex(id), item]);
+    if (row) {
+      sql("UPDATE user_inventory SET count=count+? WHERE id=?", [count, row.id]);
+    } else {
+      sql("INSERT INTO user_inventory (identifier,item,count) VALUES (?,?,?)", [this.steamHex(id), item, count]);
+    }
     return true;
   }
 
