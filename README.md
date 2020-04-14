@@ -18,7 +18,7 @@ Exemplo na config.json
 
 ### vRP
 
-** Altamente recomendamos o uso conjunto do nosso script vrp, pois nem sempre é possível checar se o jogador está online pelo players.json **
+**Altamente recomendamos o uso conjunto do nosso script vrp, pois nem sempre é possível checar se o jogador está online pelo players.json**
 
 https://github.com/JesterIruka/fivem-delivery-vrp
 
