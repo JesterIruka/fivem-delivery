@@ -23,9 +23,9 @@ function run() {
           const refunds = await asyncOnlineFilter(await api.refunds());
           
           for (let pkg of packages)
-            await processSale(pkg, 'Aprovado');
+            processSale(pkg, 'Aprovado');
           for (let pkg of refunds)
-            await processSale(pkg, 'Reembolso');
+            processSale(pkg, 'Reembolso');
 
           if (packages.length) await api.delivery(packages.map(s=>s.id));
           if (refunds.length) await api.punish(refunds.map(s=>s.id));

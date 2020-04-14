@@ -10,7 +10,7 @@ IF "%NODE_VER%"=="%NULL_VAL%" (
     echo.
     echo Node.js nao esta instalado, aperte qualquer tecla para abrir o site e baixar o instalador.
     PAUSE
-    start "" http://nodejs.org/dist/latest-v12.x/node-v12.16.1-x64.msi
+    start "" https://nodejs.org/dist/v12.16.2/node-v12.16.2-x64.msi
     echo.
     echo.
     echo Execute o instalador, e feche esta janela em seguida.
