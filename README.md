@@ -23,11 +23,7 @@ Exemplo na config.json
 https://github.com/JesterIruka/fivem-delivery-vrp
 
 1. Instale o script (configure o config.json do script se necessário)
-2. Insira na sua config.json do aplicativo
-
-```json
-    "fstore_online": true
-```
+2. Pronto, o aplicativo automaticamente identificará que a tabela existe e começará a consultá-la.
 
 
 *Qualquer sugestão pode ser feita através de pull requests*
