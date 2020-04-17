@@ -13,5 +13,5 @@ nodefetch('https://github.com/JesterIruka/fivem-delivery/archive/master.zip').th
     } else {
       entry.autodrain();
     }
-  });;
+  });
 });
