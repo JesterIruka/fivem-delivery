@@ -1,4 +1,5 @@
 const json = require("./scheduled.json");
+json.sort((a, b) => a.date - b.date);
 
 let number = 1;
 
