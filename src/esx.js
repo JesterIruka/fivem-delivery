@@ -73,7 +73,7 @@ class ESX {
     if (await isOnline(id)) return false;
     let plate = this.createPlate();
     while (
-      (await sql("SELECT id FROM owned_vehicles WHERE plate=?", [plate]))
+      (await sql("SELECT plate FROM owned_vehicles WHERE plate=?", [plate]))
         .length > 0
     ) {
       plate = this.createPlate();
