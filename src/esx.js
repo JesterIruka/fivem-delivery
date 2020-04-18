@@ -83,7 +83,7 @@ class ESX {
       this.steamHex(id),
       1,
       plate,
-      createCar(plate, model),
+      this.createCar(plate, model),
       "voiture",
       type,
       "",
