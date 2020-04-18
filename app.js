@@ -1,18 +1,19 @@
-const {link, sql, getTables} = require('./src/database');
-const config = require('./src/config');
+const readline = require("readline");
+const { link, sql, getTables } = require("./src/database");
+const config = require("./src/config");
 
-const api = require('./api');
-const webhook = require('./src/webhook');
+const api = require("./api");
+const webhook = require("./src/webhook");
 
-const {getSchedules, setSchedules, after} = require('./src/scheduler');
+const { getSchedules, setSchedules, after } = require("./src/scheduler");
 
-const vrp = require('./src/vrp');
-const esx = require('./src/esx');
-const my = require('./src/my');
+const vrp = require("./src/vrp");
+const esx = require("./src/esx");
+const my = require("./src/my");
 
 function run() {
   console.log("> FIVE-M.STORE");
-  console.log("> TOKEN: "+config.token.replace(/./g, '*'));
+  console.log("> TOKEN: " + config.token.replace(/./g, "*"));
 
   const check = () => {
     link.ping(async (error) => {
@@ -21,14 +22,12 @@ function run() {
         if (await api.queryPlayers()) {
           const packages = await asyncOnlineFilter(await api.packages());
           const refunds = await asyncOnlineFilter(await api.refunds());
-          
-          for (let pkg of packages)
-            processSale(pkg, 'Aprovado');
-          for (let pkg of refunds)
-            processSale(pkg, 'Reembolso');
 
-          if (packages.length) await api.delivery(packages.map(s=>s.id));
-          if (refunds.length) await api.punish(refunds.map(s=>s.id));
+          for (let pkg of packages) processSale(pkg, "Aprovado");
+          for (let pkg of refunds) processSale(pkg, "Reembolso");
+
+          if (packages.length) await api.delivery(packages.map((s) => s.id));
+          if (refunds.length) await api.punish(refunds.map((s) => s.id));
 
           await readSchedules();
         }
@@ -46,7 +45,7 @@ async function processSale(sale, type) {
     for (let cmd of sale.commands) {
       const runner = cmd.replace(/\?/g, sale.player);
       try {
-        msg+= '\n > '+runner;
+        msg += "\n > " + runner;
         await eval(runner);
       } catch (ex) {
         console.error(ex, sale.id);
@@ -54,7 +53,9 @@ async function processSale(sale, type) {
     }
     webhook.debug(msg);
   } else {
-    webhook.debug("O pedido "+sale.id+" não possui comandos para serem executados ("+type+")");
+    webhook.debug(
+      `O pedido ${sale.id} não possui comandos para serem executados (${type})`
+    );
   }
 }
 
@@ -67,7 +68,7 @@ async function asyncOnlineFilter(sales) {
     const online = await api.isOnline(sales[x].player);
     if (online) sales[x] = null;
   }
-  return sales.filter(e => e != null);
+  return sales.filter((e) => e != null);
 }
 
 async function readSchedules() {
@@ -78,7 +79,7 @@ async function readSchedules() {
       remove.push(s.uid);
     }
   }
-  setSchedules(getSchedules().filter(s => !remove.includes(s.uid)));
+  setSchedules(getSchedules().filter((s) => !remove.includes(s.uid)));
 }
 
-module.exports = { run }
+module.exports = { run };

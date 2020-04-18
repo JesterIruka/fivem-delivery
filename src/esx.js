@@ -145,7 +145,7 @@ class ESX {
     if (await isOnline(id)) return false;
     const [
       row,
-    ] = sql(
+    ] = await sql(
       "SELECT id FROM user_inventory WHERE identifier=? AND item=? LIMIT 1",
       [this.steamHex(id), item]
     );
