@@ -87,7 +87,6 @@ class ESX {
       "voiture",
       type,
       "",
-      0,
       garage,
     ];
     const keys = [
@@ -98,7 +97,6 @@ class ESX {
       "vehiclename",
       "type",
       "job",
-      "price",
       "garage_name",
     ];
     await sql(
