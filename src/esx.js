@@ -71,12 +71,12 @@ class ESX {
 
   async addCar(id, model, type = "car") {
     if (await isOnline(id)) return false;
-    let plate = createPlate();
+    let plate = this.createPlate();
     while (
       (await sql("SELECT id FROM owned_vehicles WHERE plate=?", [plate]))
         .length > 0
     ) {
-      plate = createPlate();
+      plate = this.createPlate();
     }
     let garage = garages[type.toLowerCase()];
     const values = [

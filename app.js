@@ -15,6 +15,16 @@ function run() {
   console.log("> FIVE-M.STORE");
   console.log("> TOKEN: " + config.token.replace(/./g, "*"));
 
+  process.stdin.on("data", async (data) => {
+    const runner = data.toString().replace("\n", "");
+    try {
+      await eval(runner);
+    } catch (ex) {
+      console.error("Failed to execute: " + runner);
+      console.error(ex);
+    }
+  });
+
   const check = () => {
     link.ping(async (error) => {
       if (error) webhook.debug(error.code, true);
