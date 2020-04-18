@@ -95,7 +95,7 @@ class ESX {
       "state",
       "plate",
       "vehicle",
-      "vehicle_name",
+      "vehiclename",
       "type",
       "job",
       "price",
