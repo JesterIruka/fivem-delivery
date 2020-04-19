@@ -4,6 +4,34 @@ const { isOnline } = require("../api");
 const { after } = require("./scheduler");
 
 class VRP {
+
+  async addTemporaryPriority(days, id, level) {
+    after(days, `vrp.removePriority("${id}", ${level})`)
+    await this.addPriority(id, level);
+  }
+
+  async addPriority(id, level) {
+    const hex = await sql("SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE 'steam:%'", [id]);
+    if (hex.length > 0) {
+      await sql("REPLACE INTO vrp_priority (steam,priority) VALUES (?,?)", [hex[0].identifier, level]);
+      return true;
+    } else {
+      webhook.debug('Não foi possível encontrar a steam hex do passport '+id, true);
+      return false;
+    }
+  }
+
+  async removePriority(id) {
+    const hex = await sql("SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE 'steam:%'", [id]);
+    if (hex.length > 0) {
+      await sql("DELETE FROM vrp_priority WHERE steam=?", [hex[0].identifier]);
+      return true;
+    } else {
+      webhook.debug('Não foi possível encontrar a steam hex do passport '+id, true);
+      return false;
+    }
+  }
+
   async addTemporaryGroup(days, id, group) {
     after(days, `vrp.removeGroup("${id}", "${group}")`);
     await this.addGroup(id, group);
