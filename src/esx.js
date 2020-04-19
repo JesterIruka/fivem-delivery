@@ -23,7 +23,7 @@ class ESX {
 
   async setGroup(id, group) {
     if (await isOnline(id)) return false;
-    await sql("UPDATE users SET group=? WHERE identifier=?", [
+    await sql("UPDATE users SET `group`=? WHERE identifier=?", [
       group,
       this.steamHex(id),
     ]);
@@ -148,12 +148,12 @@ class ESX {
       [this.steamHex(id), item]
     );
     if (row) {
-      sql("UPDATE user_inventory SET count=count+? WHERE id=?", [
+      sql("UPDATE user_inventory SET `count`=`count`+? WHERE id=?", [
         count,
         row.id,
       ]);
     } else {
-      sql("INSERT INTO user_inventory (identifier,item,count) VALUES (?,?,?)", [
+      sql("INSERT INTO user_inventory (identifier,item,`count`) VALUES (?,?,?)", [
         this.steamHex(id),
         item,
         count,
