@@ -5,6 +5,11 @@ const { after } = require("./scheduler");
 
 class VRP {
 
+  async unban(id) {
+    await sql("UPDATE vrp_users SET banned=0 WHERE id=?", [id]);
+    return true;
+  }
+
   async addTemporaryPriority(days, id, level) {
     after(days, `vrp.removePriority("${id}", ${level})`)
     await this.addPriority(id, level);
