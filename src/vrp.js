@@ -172,8 +172,8 @@ class VRP {
   async addCar(id, car) {
     if (await isOnline(id)) return false;
 
-    let table = getTables().includes("vrp_adv_garages")
-      ? "vrp_adv_garages"
+    let table = getTables().includes("vrp_user_garages")
+      ? "vrp_user_garages"
       : getTables().includes("vrp_vehicles")
       ? "vrp_vehicles"
       : "vrp_user_vehicles";
@@ -190,8 +190,8 @@ class VRP {
   async removeCar(id, car) {
     if (await isOnline(id)) return false;
 
-    let table = getTables().includes("vrp_adv_garages")
-      ? "vrp_adv_garages"
+    let table = getTables().includes("vrp_user_garages")
+      ? "vrp_user_garages"
       : getTables().includes("vrp_vehicles")
       ? "vrp_vehicles"
       : "vrp_user_vehicles";
