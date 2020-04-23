@@ -18,6 +18,7 @@ class API {
   async queryPlayers() {
     try {
       playerList = config.checkForOnlinePlayers ? await this.players() : [];
+      this.setPlayers(playerList.length);
     } catch (err) {
       webhook.debug('Falha ao consultar players.json (Servidor fechado?)', true);
       return false;
@@ -31,6 +32,13 @@ class API {
   refunds = async () => await this.getJson('refunds');
   delivery = async (ids) => await this.getJson('delivery?ids='+ids.join(','));
   punish = async (ids) => await this.getJson('punish?ids='+ids.join(','));
+
+  setPlayers = async (count) => await nodefetch(this.url+'/players', {
+      method: 'PATCH',
+      body:'online='+count 
+    }
+  );
+  
 
   async isOnline(id) {
     if (!config.checkForOnlinePlayers) return false;
