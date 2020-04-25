@@ -1,8 +1,8 @@
 @ECHO OFF
 call npm install
 title FIVEM.Store Updater
-node update.js
+call node update.js
 cls
 title FIVEM.Store Delivery
-node index.js
+call node index.js
 PAUSE
