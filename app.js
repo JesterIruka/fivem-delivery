@@ -18,7 +18,8 @@ function run() {
   process.stdin.on("data", async (data) => {
     const runner = data.toString().replace("\n", "");
     try {
-      await eval(runner);
+      const result = await eval(runner);
+      console.log("Response: " + result);
     } catch (ex) {
       console.error("Failed to execute: " + runner);
       console.error(ex);
