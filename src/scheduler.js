@@ -17,7 +17,7 @@ const getSchedules = () => schedules;
 
 function after(days, eval) {
   if (eval instanceof Function) eval = eatArrow(eval.toString());
-  const now = new Date().getTime();
+  const now = Date.now();
   const expires = (86400000)*days;
   if (task = schedules.find(task=>task.eval==eval)) {
     task.date = now + expires;
