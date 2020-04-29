@@ -28,12 +28,12 @@ class API {
 
   players = async () => (await axios.get(config.playersJsonUrl)).data;
 
-  packages = async () => (await axios.get('/packages')).data;
-  refunds = async () => (await axios.get('/refunds')).data;
-  delivery = async (ids) => (await axios.get('/delivery?ids='+ids.join(','))).data
-  punish = async (ids) => (await axios.get('/punish?ids='+ids.join(','))).data;
+  packages = async () => (await this.api.get('/packages')).data;
+  refunds = async () => (await this.api.get('/refunds')).data;
+  delivery = async (ids) => (await this.api.get('/delivery?ids='+ids.join(','))).data
+  punish = async (ids) => (await this.api.get('/punish?ids='+ids.join(','))).data;
 
-  setPlayers = async (online) => axios.patch('/players', {online});
+  setPlayers = async (online) => this.api.patch('/players', {online});
 
   async isOnline(id) {
     if (!config.checkForOnlinePlayers) return false;
