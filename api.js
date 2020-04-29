@@ -26,7 +26,7 @@ class API {
     return true;
   }
 
-  players = async () => (await axios.get(this.players)).data;
+  players = async () => (await axios.get(config.playersJsonUrl)).data;
 
   packages = async () => (await axios.get('/packages')).data;
   refunds = async () => (await axios.get('/refunds')).data;
