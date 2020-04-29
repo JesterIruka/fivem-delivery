@@ -1,4 +1,4 @@
-const nodefetch = require('node-fetch').default;
+const axios = require('axios').default;
 const config = require('./src/config');
 const { sql, getTables } = require('./src/database');
 const webhook = require('./src/webhook');
@@ -8,11 +8,9 @@ let playerList = [];
 class API {
 
   constructor(token) {
-    this.url = 'https://five-m.store/api/'+token+'/';
-  }
-
-  async getJson(path) {
-    return (await nodefetch(this.url+path)).json();
+    this.api = axios.create({
+      baseURL: 'https://five-m.store/api/'+token
+    });
   }
 
   async queryPlayers() {
@@ -28,19 +26,14 @@ class API {
     return true;
   }
 
-  players = async () => await (await nodefetch(config.playersJsonUrl)).json();
+  players = async () => (await axios.get(this.players)).data;
 
-  packages = async () => this.getJson('packages');
-  refunds = async () => await this.getJson('refunds');
-  delivery = async (ids) => await this.getJson('delivery?ids='+ids.join(','));
-  punish = async (ids) => await this.getJson('punish?ids='+ids.join(','));
+  packages = async () => (await axios.get('/packages')).data;
+  refunds = async () => (await axios.get('/refunds')).data;
+  delivery = async (ids) => (await axios.get('/delivery?ids='+ids.join(','))).data
+  punish = async (ids) => (await axios.get('/punish?ids='+ids.join(','))).data;
 
-  setPlayers = async (count) => await nodefetch(this.url+'players', {
-      method: 'PATCH',
-      body:'online='+count 
-    }
-  );
-  
+  setPlayers = async (online) => axios.patch('/players', {online});
 
   async isOnline(id) {
     if (!config.checkForOnlinePlayers) return false;
