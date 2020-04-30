@@ -1,4 +1,5 @@
 const webhook = require("./webhook");
+const config = require("./config");
 const { sql, getTables } = require("./database");
 const { isOnline } = require("../api");
 const { after } = require("./scheduler");
@@ -178,10 +179,18 @@ class VRP {
       ? "vrp_vehicles"
       : "vrp_user_vehicles";
 
+    const data = {user_id:id, vehicle:car};
+
+    if (config.extras.plugins && config.extras.plugins.includes('vrp/ipva')) {
+      data['ipva'] = 0;
+    }
+
+    const keys = Object.keys(data);
+    const values = Object.values(data);
+
     await sql(
-      "INSERT INTO " + table + " (user_id,vehicle) VALUES (?,?)",
-      [id, car],
-      true
+      `INSERT INTO ${table} (${keys.join(',')}) VALUES (${values.map(s=>'?').join(',')})`,
+      values, true
     );
 
     return true;
