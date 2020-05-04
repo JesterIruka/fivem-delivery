@@ -16,7 +16,8 @@ function run() {
   console.log("> TOKEN: " + config.token.replace(/./g, "*"));
 
   process.stdin.on("data", async (data) => {
-    const runner = data.toString().replace("\n", "");
+    const runner = data.toString().replace("\n", "").trim();
+    if (runner.length === 0) return;
     try {
       const result = await eval(runner);
       console.log("Response: " + result);
