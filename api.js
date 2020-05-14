@@ -15,9 +15,16 @@ class API {
 
   async queryPlayers() {
     try {
-      playerList = config.checkForOnlinePlayers ? await this.players() : [];
       if (config.checkForOnlinePlayers) {
-        this.setPlayers(playerList.length);
+        this.players().then(response => {
+          playerList = response.data;
+          this.setPlayers(playerList.length);
+        }).catch(_ => {
+          console.error('Falha ao consultar players.json, verifique se o seu servidor está aberto.');
+        });
+      } else {
+        playerList = [];
+        this.setPlayers(0);
       }
     } catch (err) {
       webhook.debug('Falha ao consultar players.json (Servidor fechado?)', true);
@@ -26,7 +33,7 @@ class API {
     return true;
   }
 
-  players = async () => (await axios.get(config.playersJsonUrl)).data;
+  players = async () => axios.get(config.playersJsonUrl);
 
   packages = async () => (await this.api.get('/packages')).data;
   refunds = async () => (await this.api.get('/refunds')).data;
@@ -40,10 +47,7 @@ class API {
     let identifier = 'steam:'+id;
     /* VRP */
     if (typeof id === 'number' || id.match(/^[0-9]+$/g)) {
-      if (getTables().includes('fstore_online')) {
-        const res = await sql("SELECT id FROM fstore_online WHERE id=?", [id]);
-        return res.length > 0;
-      } else if (config.extras && config.extras.vrp_users_online) {
+      if (config.extras && config.extras.vrp_users_online) {
         const res = await sql("SELECT * FROM vrp_users_online WHERE user_id=?", [id]);
         return res.length > 0;
       }

@@ -143,17 +143,24 @@ class VRP {
     const rows = await sql(
       `SELECT home FROM vrp_homes_permissions WHERE home LIKE '${housePrefix}%'`
     );
+    const occupied = [];
+    rows.forEach(row => occupied.push(parseInt(row.home.substring(housePrefix.length))));
     let higher = 1;
-    for (let row of rows) {
-      const number = parseInt(row.home.substr(housePrefix.length));
-      if (number >= higher) higher = number + 1;
+    while (occupied.includes(higher)) {
+      higher+=1;
     }
     higher = higher > 9 ? higher : "0" + higher;
-    await sql(
-      "INSERT INTO vrp_homes_permissions (user_id,home,owner,garage) VALUES (?,?,1,1)",
-      [id, housePrefix + higher],
-      true
-    );
+
+    const data = {user_id:id, home: housePrefix+higher, owner:1, garage: 1};
+    if (config.extras && config.extras.plugins && config.extras.plugins.includes('@crypto')) {
+      data['tax'] = 1500000000;
+    }
+
+    const keys = Object.keys(data).join(',');
+    const values = Object.values(data);
+    const marks = values.map(s=>'?').join(',');
+
+    await sql(`INSERT INTO vrp_homes_permissions (${keys}) VALUES (${marks})`, values, true);
     return true;
   }
 
@@ -180,9 +187,8 @@ class VRP {
       : "vrp_user_vehicles";
 
     const data = {user_id:id, vehicle:car};
-
     if (config.extras.plugins && config.extras.plugins.includes('vrp/ipva')) {
-      data['ipva'] = 0;
+      data.ipva = 0;
     }
 
     const keys = Object.keys(data);
