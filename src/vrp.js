@@ -17,8 +17,7 @@ class VRP {
 
   async addPriority(id, level) {
     const hex = await sql(
-      "SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE 'steam:%'",
-      [id]
+      "SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE 'steam:%'", [id]
     );
     if (hex.length > 0) {
       await sql("REPLACE INTO vrp_priority (steam,priority) VALUES (?,?)", [
@@ -37,8 +36,7 @@ class VRP {
 
   async removePriority(id) {
     const hex = await sql(
-      "SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE 'steam:%'",
-      [id]
+      "SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE 'steam:%'", [id]
     );
     if (hex.length > 0) {
       await sql("DELETE FROM vrp_priority WHERE steam=?", [hex[0].identifier]);
@@ -61,8 +59,8 @@ class VRP {
     if (await isOnline(id)) return false;
     const res = await sql(
       "SELECT dvalue FROM vrp_user_data WHERE user_id='" +
-        id +
-        "' AND dkey='vRP:datatable'"
+      id +
+      "' AND dkey='vRP:datatable'"
     );
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
@@ -72,8 +70,7 @@ class VRP {
       }
       data.groups[group] = true;
       await sql(
-        "UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'",
-        [JSON.stringify(data), id]
+        "UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'", [JSON.stringify(data), id]
       );
       return true;
     } else {
@@ -85,15 +82,13 @@ class VRP {
   async removeGroup(id, group) {
     if (await isOnline(id)) return false;
     const res = await sql(
-      "SELECT dvalue FROM vrp_user_data WHERE user_id=? AND dkey='vRP:datatable'",
-      [id]
+      "SELECT dvalue FROM vrp_user_data WHERE user_id=? AND dkey='vRP:datatable'", [id]
     );
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
       if (!Array.isArray(data.groups)) delete data.groups[group];
       sql(
-        "UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'",
-        [JSON.stringify(data), id]
+        "UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'", [JSON.stringify(data), id]
       );
       return true;
     } else {
@@ -110,14 +105,12 @@ class VRP {
   async addHouse(id, house) {
     if (await isOnline(id)) return false;
     const highest = await sql(
-      "SELECT MAX(number) AS `high` FROM vrp_user_homes WHERE home=?",
-      [house]
+      "SELECT MAX(number) AS `high` FROM vrp_user_homes WHERE home=?", [house]
     );
     let number = 1;
     if (highest.length > 0) number = highest[0].high + 1;
     await sql(
-      "INSERT INTO vrp_user_homes (user_id,home,number) VALUES (?,?,?)",
-      [id, house, number],
+      "INSERT INTO vrp_user_homes (user_id,home,number) VALUES (?,?,?)", [id, house, number],
       true
     );
     return true;
@@ -126,8 +119,7 @@ class VRP {
   async removeHouse(id, house) {
     if (await isOnline(id)) return false;
     await sql(
-      "DELETE FROM vrp_user_homes WHERE user_id=? AND home=?",
-      [id, house],
+      "DELETE FROM vrp_user_homes WHERE user_id=? AND home=?", [id, house],
       true
     );
     return true;
@@ -147,18 +139,18 @@ class VRP {
     rows.forEach(row => occupied.push(parseInt(row.home.substring(housePrefix.length))));
     let higher = 1;
     while (occupied.includes(higher)) {
-      higher+=1;
+      higher += 1;
     }
     higher = higher > 9 ? higher : "0" + higher;
 
-    const data = {user_id:id, home: housePrefix+higher, owner:1, garage: 1};
+    const data = { user_id: id, home: housePrefix + higher, owner: 1, garage: 1 };
     if (config.extras && config.extras.plugins && config.extras.plugins.includes('@crypto')) {
       data['tax'] = 1500000000;
     }
 
     const keys = Object.keys(data).join(',');
     const values = Object.values(data);
-    const marks = values.map(s=>'?').join(',');
+    const marks = values.map(s => '?').join(',');
 
     await sql(`INSERT INTO vrp_homes_permissions (${keys}) VALUES (${marks})`, values, true);
     return true;
@@ -180,24 +172,22 @@ class VRP {
   async addCar(id, car) {
     if (await isOnline(id)) return false;
 
-    let table = getTables().includes("vrp_user_garages")
-      ? "vrp_user_garages"
-      : getTables().includes("vrp_vehicles")
-      ? "vrp_vehicles"
-      : "vrp_user_vehicles";
+    let table = getTables().includes("vrp_user_garages") ?
+      "vrp_user_garages" :
+      getTables().includes("vrp_vehicles") ?
+        "vrp_vehicles" :
+        "vrp_user_vehicles";
 
-    const data = {user_id:id, vehicle:car};
+    const data = { user_id: id, vehicle: car };
     if (config.extras.plugins && config.extras.plugins.includes('vrp/ipva')) {
       data.ipva = 0;
     }
 
-    const keys = Object.keys(data);
+    const keys = Object.keys(data).join(',');
     const values = Object.values(data);
+    const marks = values.map(s => '?').join(',');
 
-    await sql(
-      `INSERT INTO ${table} (${keys.join(',')}) VALUES (${values.map(s=>'?').join(',')})`,
-      values, true
-    );
+    await sql(`INSERT INTO ${table} (${keys}) VALUES (${marks})`, values, true);
 
     return true;
   }
@@ -205,16 +195,13 @@ class VRP {
   async removeCar(id, car) {
     if (await isOnline(id)) return false;
 
-    let table = getTables().includes("vrp_user_garages")
-      ? "vrp_user_garages"
-      : getTables().includes("vrp_vehicles")
-      ? "vrp_vehicles"
-      : "vrp_user_vehicles";
+    let table = getTables().includes("vrp_user_garages") ?
+      "vrp_user_garages" :
+      getTables().includes("vrp_vehicles") ?
+        "vrp_vehicles" :
+        "vrp_user_vehicles";
 
-    await sql("DELETE FROM " + table + " WHERE user_id=? AND vehicle=?", [
-      id,
-      car,
-    ]);
+    await sql("DELETE FROM " + table + " WHERE user_id=? AND vehicle=?", [id, car]);
     return true;
   }
 
@@ -229,19 +216,24 @@ class VRP {
 
   async addBank(id, value) {
     if (await isOnline(id)) return false;
-    await sql("UPDATE vrp_user_moneys SET bank=bank+? WHERE user_id=?", [
-      value,
-      id,
-    ]);
+
+    const row = await sql("SELECT bank FROM vrp_user_moneys WHERE user_id=?", [id]);
+    const bank = row.length ? row[0].bank : 0;
+    const total = bank + value;
+
+    webhook.debug('Dinheiro no banco antes de entregar: ' + bank);
+
+    await sql("UPDATE vrp_user_moneys SET bank=? WHERE user_id=?", [total, id], false, false);
+
+    webhook.debug('Dinheiro no banco atualizado para ' + total);
+
     return true;
   }
 
   async addWeapon(id, weapon, ammo) {
     if (await isOnline(id)) return false;
     const res = await sql(
-      "SELECT dvalue FROM vrp_user_data WHERE user_id='" +
-        id +
-        "' AND dkey='vRP:datatable'"
+      "SELECT dvalue FROM vrp_user_data WHERE user_id=? AND dkey='vRP:datatable'", [id]
     );
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
@@ -251,8 +243,7 @@ class VRP {
         data.weapons[weapon][ammo] += ammo;
       } else data.weapons[weapon] = { ammo };
       await sql(
-        "UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'",
-        [JSON.stringify(data), id]
+        "UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'", [JSON.stringify(data), id]
       );
       return true;
     } else {
@@ -265,8 +256,8 @@ class VRP {
     if (await isOnline(id)) return false;
     const res = await sql(
       "SELECT dvalue FROM vrp_user_data WHERE user_id='" +
-        id +
-        "' AND dkey='vRP:datatable'"
+      id +
+      "' AND dkey='vRP:datatable'"
     );
     if (res.length > 0) {
       const data = JSON.parse(res[0].dvalue);
@@ -277,8 +268,7 @@ class VRP {
         data.inventory[item] = { amount: data.inventory[item].amount + amount };
       } else data.inventory[item] = { amount };
       await sql(
-        "UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'",
-        [JSON.stringify(data), id]
+        "UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'", [JSON.stringify(data), id]
       );
       return true;
     } else {
