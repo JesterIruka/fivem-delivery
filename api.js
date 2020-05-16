@@ -55,13 +55,13 @@ class API {
     if (online_cache[id] && online_cache[id].expires > Date.now()) {
       return online_cache[id].online;
     }
-    const online = await this._isOnline();
+    const online = await this._isOnline(id);
     saveToCache(id, online);
     webhook.debug(`${id} is ${online ? 'online' : 'offline'}`)
     return online;
   }
 
-  async _isOnline() {
+  async _isOnline(id) {
     if (!config.checkForOnlinePlayers) return false;
     let identifier = 'steam:' + id;
     /* VRP */
