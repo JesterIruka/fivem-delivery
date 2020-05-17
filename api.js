@@ -6,6 +6,14 @@ const webhook = require('./src/webhook');
 let playerList = [];
 
 /* is online */
+async function getIdentifier(id) {
+  let pattern = 'license:%';
+  if (config.hasPlugin('vrp/steam')) pattern = 'steam:%';
+  const rows = await sql("SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE ?", [id, pattern]);
+  if (rows.length) return rows[0].identifier;
+  else return null;
+}
+
 async function inPlayerList(id) {
   if (!config.checkForOnlinePlayers) return false;
   let identifier = 'steam:' + id;
@@ -15,11 +23,11 @@ async function inPlayerList(id) {
       const res = await sql("SELECT * FROM vrp_users_online WHERE user_id=?", [id]);
       return res.length > 0;
     }
-    const res = await sql("SELECT `identifier` FROM vrp_user_ids WHERE user_id=? AND identifier LIKE 'license:%'", [id])
-    if (res.length == 0) {
-      webhook.debug('Não foi possível encontrar o identifier de ' + id);
+    identifier = await getIdentifier(id);
+    if (!identifier) {
+      webhook.debug(`Não fo possível encontrar o identifier de ${id}`);
       return true;
-    } else identifier = res[0].identifier;
+    }
   }
   /* END VRP */
   for (let player of playerList) {

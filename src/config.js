@@ -22,4 +22,13 @@ if (!fs.existsSync(path)) {
   process.exit(0);
 }
 
-module.exports = JSON.parse(fs.readFileSync(path));
+const config = JSON.parse(fs.readFileSync(path));
+
+function hasPlugin(name) {
+  return config.extras && config.extras.plugins && config.extras.plugins.includes(name);
+}
+
+module.exports = {
+  ...config,
+  hasPlugin
+};
