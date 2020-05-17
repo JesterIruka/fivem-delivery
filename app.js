@@ -94,4 +94,14 @@ async function readSchedules() {
   setSchedules(getSchedules().filter((s) => !remove.includes(s.uid)));
 }
 
+function changePlayerId(from, to) {
+  setSchedules(getSchedules().map(s => {
+    if (s.eval.includes(`"${from}"`)) {
+      s.eval = s.eval.replace(`"${from}"`, `"${to}"`);
+    }
+    return s;
+  }));
+  return `Todos os agendamentos no id ${from} foram alterados para ${to}`;
+}
+
 module.exports = { run };

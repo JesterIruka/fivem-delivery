@@ -8,7 +8,8 @@ let playerList = [];
 /* is online */
 async function getIdentifier(id) {
   let pattern = 'license:%';
-  if (config.hasPlugin('vrp/steam')) pattern = 'steam:%';
+  if (config.extras && config.extras.plugins && config.extras.plugins.includes('vrp/steam'))
+   pattern = 'steam:%';
   const rows = await sql("SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE ?", [id, pattern]);
   if (rows.length) return rows[0].identifier;
   else return null;

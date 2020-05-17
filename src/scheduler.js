@@ -1,7 +1,7 @@
 const fs = require('fs');
 const webhook = require('./webhook');
-
 const path = __dirname+'/../scheduled.json';
+
 let schedules = [];
 
 if (!fs.existsSync(path)) {
@@ -15,12 +15,19 @@ function setSchedules(list) {
 
 const getSchedules = () => schedules;
 
+const DAY_MILLIS = 86400000;
+
 function after(days, eval) {
   if (eval instanceof Function) eval = eatArrow(eval.toString());
   const now = Date.now();
   const expires = (86400000)*days;
   if (task = schedules.find(task=>task.eval==eval)) {
-    task.date = now + expires;
+    const diff = task.date - now;
+    if (diff <= DAY_MILLIS*7) {
+      task.date = task.date + expires;
+    } else {
+      task.date = now + expires;
+    }
   } else {
     schedules.push({uid:uuidv4(),date:(now+expires),eval});
   }
