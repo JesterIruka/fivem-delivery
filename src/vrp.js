@@ -109,8 +109,16 @@ class VRP {
     );
     let number = 1;
     if (highest.length > 0) number = highest[0].high + 1;
+
+    const data = {user_id:id, home:house, number}
+    if (config.extras && config.extras.plugins && config.extras.plugins.includes('@americandream'))
+      data['can_sell'] = 0;
+
+    const keys = Objet.keys(data).join(',');
+    const marks = Object.keys(data).map(s=>'?').join(',');
+
     await sql(
-      "INSERT INTO vrp_user_homes (user_id,home,number) VALUES (?,?,?)", [id, house, number],
+      `INSERT INTO vrp_user_homes (${keys}) VALUES (${marks})`, [Object.values(data)],
       true
     );
     return true;
@@ -179,9 +187,10 @@ class VRP {
         "vrp_user_vehicles";
 
     const data = { user_id: id, vehicle: car };
-    if (config.extras.plugins && config.extras.plugins.includes('vrp/ipva')) {
+    if (config.extras && config.extras.plugins && config.extras.plugins.includes('vrp/ipva'))
       data.ipva = 0;
-    }
+    if (config.extras && config.extras.plugins && config.extras.plugins.includes('@americandream'))
+      data['can_sell'] = 0;
 
     const keys = Object.keys(data).join(',');
     const values = Object.values(data);
