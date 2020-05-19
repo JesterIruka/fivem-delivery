@@ -2,14 +2,15 @@ const axios = require('axios').default;
 const config = require('./src/config');
 const { sql, getTables } = require('./src/database');
 const webhook = require('./src/webhook');
+const { hasPlugin } = require('./src/utils');
 
 let playerList = [];
 
 /* is online */
 async function getIdentifier(id) {
   let pattern = 'license:%';
-  if (config.extras && config.extras.plugins && config.extras.plugins.includes('vrp/steam'))
-   pattern = 'steam:%';
+  if (hasPlugin('vrp/steam'))
+    pattern = 'steam:%';
   const rows = await sql("SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE ?", [id, pattern]);
   if (rows.length) return rows[0].identifier;
   else return null;
@@ -46,8 +47,15 @@ const online_cache = {};
 
 function saveToCache(id, online) {
   online_cache[id] = {
-    expires: Date.now() + 500,
+    expires: Date.now() + 1000,
     online
+  }
+}
+function clearOnlineCache() {
+  for (let id in online_cache) {
+    if (online_cache[id].expires < Date.now()) {
+      delete online_cache[id];
+    }
   }
 }
 /* end cache */
@@ -61,6 +69,7 @@ class API {
   }
 
   async queryPlayers() {
+    clearOnlineCache();
     try {
       if (config.checkForOnlinePlayers) {
         this.players().then(response => {
@@ -95,7 +104,7 @@ class API {
     }
     const online = await inPlayerList(id);
     saveToCache(id, online);
-    webhook.debug(`${id} is ${online ? 'online' : 'offline'}`)
+    webhook.debug(`${id} is ${online ? 'online' : 'offline'}`, false, true);
     return online;
   }
 }
