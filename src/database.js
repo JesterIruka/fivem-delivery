@@ -30,7 +30,7 @@ async function insert(table, data, ignore = false, debug = true) {
 
 function firstTable(tables) {
   if (!Array.isArray(tables)) tables = arguments;
-  for (let table of iterable) {
+  for (let table of tables) {
     if (getTables().find(s => s.toLowerCase() === table.toLowerCase()))
       return table;
   }
