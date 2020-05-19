@@ -28,8 +28,7 @@ async function insert(table, data, ignore = false, debug = true) {
   return await sql(cmd, values, ignore, debug);
 }
 
-function firstTable(tables) {
-  if (!Array.isArray(tables)) tables = arguments;
+function firstTable(...tables) {
   for (let table of tables) {
     if (getTables().find(s => s.toLowerCase() === table.toLowerCase()))
       return table;
