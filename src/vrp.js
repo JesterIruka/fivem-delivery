@@ -3,6 +3,7 @@ const config = require("./config");
 const { sql, getTables } = require("./database");
 const { isOnline } = require("../api");
 const { after } = require("./scheduler");
+const { americandreamDate, hasPlugin } = require("./utils");
 
 class VRP {
   async unban(id) {
@@ -52,10 +53,10 @@ class VRP {
 
   async addTemporaryGroup(days, id, group) {
     after(days, `vrp.removeGroup("${id}", "${group}")`);
-    await this.addGroup(id, group);
+    await this.addGroup(id, group, days);
   }
 
-  async addGroup(id, group) {
+  async addGroup(id, group, days=0) {
     if (await isOnline(id)) return false;
     const res = await sql(
       "SELECT dvalue FROM vrp_user_data WHERE user_id='" +
@@ -66,9 +67,14 @@ class VRP {
       const data = JSON.parse(res[0].dvalue);
       webhook.debug("Grupos antigos: " + JSON.stringify(data.groups));
       if (Array.isArray(data.groups)) {
-        data.groups = {};
+        data.groups = {}; 
       }
       data.groups[group] = true;
+      if (hasPlugin('@americandream')) {
+        if (!data.groupsTime) data.groupsTime = {};
+        data.groupsTime[group] = americandreamDate(new Date(Date.now()+(86400000*days))); 
+      }
+
       await sql(
         "UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'", [JSON.stringify(data), id]
       );
@@ -111,7 +117,7 @@ class VRP {
     if (highest.length > 0) number = highest[0].high + 1;
 
     const data = {user_id:id, home:house, number}
-    if (config.extras && config.extras.plugins && config.extras.plugins.includes('@americandream'))
+    if (hasPlugin('@americandream'))
       data['can_sell'] = 0;
 
     const keys = Objet.keys(data).join(',');
@@ -152,7 +158,7 @@ class VRP {
     higher = higher > 9 ? higher : "0" + higher;
 
     const data = { user_id: id, home: housePrefix + higher, owner: 1, garage: 1 };
-    if (config.extras && config.extras.plugins && config.extras.plugins.includes('@crypto')) {
+    if (hasPlugin('@crypto')) {
       data['tax'] = 1500000000;
     }
 
@@ -187,9 +193,9 @@ class VRP {
         "vrp_user_vehicles";
 
     const data = { user_id: id, vehicle: car };
-    if (config.extras && config.extras.plugins && config.extras.plugins.includes('vrp/ipva'))
+    if (hasPlugin('vrp/ipva'))
       data.ipva = 0;
-    if (config.extras && config.extras.plugins && config.extras.plugins.includes('@americandream'))
+    if (hasPlugin('@americandream'))
       data['can_sell'] = 0;
 
     const keys = Object.keys(data).join(',');
