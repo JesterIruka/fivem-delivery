@@ -150,6 +150,8 @@ class VRP {
     const values = Object.values(data);
     const marks = values.map(s => '?').join(',');
 
+    await insert('vrp_homes_permissions', data);
+
     await sql(`INSERT INTO vrp_homes_permissions (${keys}) VALUES (${marks})`, values, true);
     return true;
   }
@@ -158,7 +160,7 @@ class VRP {
     if (await isOnline(id)) return false;
     await sql(
       `DELETE FROM vrp_homes_permissions WHERE user_id=? AND home LIKE '${housePrefix}%' AND owner>0`
-    );
+      , [id]);
     return true;
   }
 
