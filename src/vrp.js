@@ -130,6 +130,15 @@ class VRP {
 
   async addHousePermission(id, housePrefix) {
     if (await isOnline(id)) return false;
+    if (hasPlugin('@valhalla')) {
+      const data = {
+        owner: 1, garage: 1, tax: 0,
+        user_id: id,
+        home: housePrefix,
+      };
+      await insert('vrp_homes_permissions', data);
+      return true;
+    }
     const rows = await sql(
       `SELECT home FROM vrp_homes_permissions WHERE home LIKE '${housePrefix}%'`
     );
