@@ -175,7 +175,9 @@ class VRP {
     const table = firstTable('vrp_user_garages', 'vrp_vehicles', 'vrp_user_vehicles');
 
     const data = { user_id: id, vehicle: car };
-    if (hasPlugin('vrp/ipva'))
+    if (hasPlugin('@valhalla'))
+      data.ipva = 1994967296;
+    else if (hasPlugin('vrp/ipva'))
       data.ipva = parseInt(Date.now() / 1000);
     if (hasPlugin('@americandream'))
       data['can_sell'] = 0;
