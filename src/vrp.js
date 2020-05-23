@@ -142,8 +142,8 @@ class VRP {
     higher = higher > 9 ? higher : "0" + higher;
 
     const data = { user_id: id, home: housePrefix + higher, owner: 1, garage: 1 };
-    if (hasPlugin('@crypto')) {
-      data['tax'] = 1500000000;
+    if (hasPlugin('@crypto') || hasPlugin('vrp/house-tax')) {
+      data['tax'] = parseInt(Date.now() / 1000);
     }
 
     const keys = Object.keys(data).join(',');
