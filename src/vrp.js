@@ -176,7 +176,7 @@ class VRP {
 
     const data = { user_id: id, vehicle: car };
     if (hasPlugin('vrp/ipva'))
-      data.ipva = 0;
+      data.ipva = Date.now();
     if (hasPlugin('@americandream'))
       data['can_sell'] = 0;
 
