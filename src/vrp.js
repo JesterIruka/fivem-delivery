@@ -151,8 +151,6 @@ class VRP {
     const marks = values.map(s => '?').join(',');
 
     await insert('vrp_homes_permissions', data);
-
-    await sql(`INSERT INTO vrp_homes_permissions (${keys}) VALUES (${marks})`, values, true);
     return true;
   }
 
