@@ -10,8 +10,10 @@ async function sql(sql, values = [], ignoreError = false, debug = true) {
     if (debug) webhook.debug(body);
     link.query(sql, values, (err, results) => {
       if (err) {
-        webhook.debug('Erro em ' + sql + (ignoreError ? ' (Ignorado)' : '') + '\n' + err, true);
-        if (ignoreError) resolve([]);
+        if (err.message.includes('ER_DUP_ENTRY')) {
+          webhook.debug(`Valor duplicado em ${sql}\nEste erro foi ignorado por acontecer em casas e carros`);
+          resolve([]);
+        } else if (ignoreError) resolve([]);
         else reject(err);
       } else resolve(results);
     });

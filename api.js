@@ -22,12 +22,12 @@ async function inPlayerList(id) {
   /* VRP */
   if (typeof id === 'number' || id.match(/^[0-9]+$/g)) {
     if (config.extras && config.extras.vrp_users_online) {
-      const res = await sql("SELECT * FROM vrp_users_online WHERE user_id=?", [id]);
+      const res = await sql("SELECT * FROM vrp_users_online WHERE user_id=?", [id], false, false);
       return res.length > 0;
     }
     identifier = await getIdentifier(id);
     if (!identifier) {
-      webhook.debug(`Não fo possível encontrar o identifier de ${id}`);
+      webhook.debug(`Não foi possível encontrar o identifier de ${id}`);
       return true;
     }
   }
