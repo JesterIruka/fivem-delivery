@@ -134,9 +134,14 @@ class VRP {
 
   async addHousePermission(id, housePrefix) {
     if (await isOnline(id)) return false;
-    const rows = await sql(
-      `SELECT home FROM vrp_homes_permissions WHERE home LIKE '${housePrefix}%'`
-    );
+    const rows = await sql(`SELECT home FROM vrp_homes_permissions WHERE home LIKE '${housePrefix}%'`);
+    if (hasPlugin('@valhalla')) {
+      const tax = rows.length > 0 ? '' : parseInt(Date.now()/1000);
+      const data = { user_id: id, home: housePrefix, owner: 1, garage: 1, tax };
+      await insert('vrp_homes_permissions', data);
+      return true;
+    }
+
     const occupied = [];
     rows.forEach(row => occupied.push(parseInt(row.home.substring(housePrefix.length))));
     let higher = 1;
@@ -149,10 +154,6 @@ class VRP {
     if (hasPlugin('@crypto') || hasPlugin('vrp/house-tax')) {
       data['tax'] = parseInt(Date.now() / 1000);
     }
-
-    const keys = Object.keys(data).join(',');
-    const values = Object.values(data);
-    const marks = values.map(s => '?').join(',');
 
     await insert('vrp_homes_permissions', data);
     return true;
