@@ -63,6 +63,10 @@ class VRP {
       if (Array.isArray(data.groups)) {
         data.groups = {};
       }
+      if (hasPlugin('@valhalla')) {
+        for (let g of ['Bronze','Prata','Ouro','Platina','Diamante','Patrao'])
+          delete data.groups[g];
+      }
       data.groups[group] = true;
       if (hasPlugin('@americandream')) {
         if (!data.groupsTime) data.groupsTime = {};
