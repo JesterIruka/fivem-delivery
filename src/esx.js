@@ -175,14 +175,14 @@ class ESX {
     const l = () =>
       this.letters[
         Math.min(
-          this.letters.length,
+          this.letters.length-1,
           Math.round(Math.random() * this.letters.length)
         )
       ];
     const n = () =>
       this.numbers[
         Math.min(
-          this.numbers.length,
+          this.numbers.length-1,
           Math.round(Math.random() * this.numbers.length)
         )
       ];
