@@ -1,6 +1,6 @@
 const webhook = require("./webhook");
 const { isOnline } = require("../api");
-const { sql } = require("./database");
+const { sql, insert } = require("./database");
 const { after } = require("./scheduler");
 
 const garages = {
@@ -72,49 +72,31 @@ class ESX {
   async addCar(id, model, type = "car") {
     if (await isOnline(id)) return false;
     let plate = this.createPlate();
-    while (
-      (await sql("SELECT plate FROM owned_vehicles WHERE plate=?", [plate]))
-        .length > 0
-    ) {
+    while ((await sql("SELECT plate FROM owned_vehicles WHERE plate=?", [plate])).length > 0) {
       plate = this.createPlate();
     }
     let garage = garages[type.toLowerCase()];
-    const values = [
-      this.steamHex(id),
-      1,
+    const data = {
+      owner: this.steamHex(id),
+      state: 1,
       plate,
-      JSON.stringify(this.createCar(plate, model)),
-      "voiture",
+      vehicle: JSON.stringify(this.createCar(plate, model)),
+      vehiclename: "voiture",
       type,
-      "",
-      garage,
-    ];
-    const keys = [
-      "owner",
-      "state",
-      "plate",
-      "vehicle",
-      "vehiclename",
-      "type",
-      "job",
-      "garage_name",
-    ];
-    await sql(
-      `INSERT INTO owned_vehicles (${keys.join(",")}) VALUES (${values
-        .map((v) => "?")
-        .join(",")})`,
-      values
-    );
+      job: "",
+      garage_name: garage,
+      state: 0,
+      stored: 1
+    };
+    await insert('owned_vehicles', data);
     return true;
   }
 
   async removeCar(id, model) {
     if (await isOnline(id)) return false;
-    const cars = await sql("SELECT plate,vehicle FROM owner=?", [
-      this.steamHex(id),
-    ]);
+    const cars = await sql("SELECT plate,vehicle FROM owner=?", [this.steamHex(id)]);
     for (let row of cars) {
-      if (JSON.stringify(row.vehicle).model == model) {
+      if (JSON.parse(row.vehicle).model == model) {
         await sql("DELETE FROM owned_vehicles WHERE plate=?", [row.plate]);
       }
     }
@@ -123,41 +105,28 @@ class ESX {
 
   async addMoney(id, money) {
     if (await isOnline(id)) return false;
-    await sql("UPDATE users SET money=money+? WHERE identifier=?", [
-      money,
-      this.steamHex(id),
-    ]);
+    await sql("UPDATE users SET money=money+? WHERE identifier=?", [money, this.steamHex(id)]);
     return true;
   }
 
   async addBank(id, bank) {
     if (await isOnline(id)) return false;
-    await sql("UPDATE users SET bank=bank+? WHERE identifier=?", [
-      bank,
-      this.steamHex(id),
-    ]);
+    await sql("UPDATE users SET bank=bank+? WHERE identifier=?", [bank, this.steamHex(id)]);
     return true;
   }
 
   async addInventory(id, item, count) {
     if (await isOnline(id)) return false;
-    const [
-      row,
-    ] = await sql(
+    const [row] = await sql(
       "SELECT id FROM user_inventory WHERE identifier=? AND item=? LIMIT 1",
       [this.steamHex(id), item]
     );
     if (row) {
-      sql("UPDATE user_inventory SET `count`=`count`+? WHERE id=?", [
-        count,
-        row.id,
-      ]);
+      sql("UPDATE user_inventory SET `count`=`count`+? WHERE id=?", [count, row.id]);
     } else {
-      sql("INSERT INTO user_inventory (identifier,item,`count`) VALUES (?,?,?)", [
-        this.steamHex(id),
-        item,
-        count,
-      ]);
+      sql("INSERT INTO user_inventory (identifier,item,`count`) VALUES (?,?,?)", 
+        [this.steamHex(id), item, count]
+      );
     }
     return true;
   }
@@ -172,21 +141,13 @@ class ESX {
   }
 
   createPlate() {
-    const l = () =>
-      this.letters[
-        Math.min(
-          this.letters.length-1,
-          Math.round(Math.random() * this.letters.length)
-        )
-      ];
-    const n = () =>
-      this.numbers[
-        Math.min(
-          this.numbers.length-1,
-          Math.round(Math.random() * this.numbers.length)
-        )
-      ];
+    const l = () => this.randomItemOfArray(this.letters);
+    const n = () => this.randomItemOfArray(this.numbers);
     return l() + l() + l() + n() + n() + n() + n();
+  }
+
+  randomItemOfArray(array) {
+    return array[Math.ceil(Math.random() * (array.length-1))];
   }
 }
 
