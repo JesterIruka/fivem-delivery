@@ -64,7 +64,7 @@ class API {
 
   constructor(token) {
     this.api = axios.create({
-      baseURL: 'https://five-m.store/api/' + token
+      baseURL: 'https://api.five-m.store/api/' + token
     });
   }
 
